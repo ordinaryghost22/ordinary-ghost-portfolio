@@ -1,0 +1,332 @@
+@import 'tailwindcss';
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  /* Brand */
+  --void: #09090b;
+  --surface: #111110;
+  --ghost-white: #f5f4f0;
+  --fog: #8f8d86;
+  --mist: #48463f;
+  --gold: #c6a15b;
+  --amber: #d4af37;
+  --indigo-deep: #1e1b4b;
+
+  --background: var(--void);
+  --foreground: var(--ghost-white);
+  --card: var(--surface);
+  --card-foreground: var(--ghost-white);
+  --popover: var(--surface);
+  --popover-foreground: var(--ghost-white);
+  --primary: var(--gold);
+  --primary-foreground: var(--void);
+  --secondary: var(--surface);
+  --secondary-foreground: var(--ghost-white);
+  --muted: var(--surface);
+  --muted-foreground: var(--fog);
+  --accent: var(--gold);
+  --accent-foreground: var(--void);
+  --destructive: #b4543f;
+  --border: var(--mist);
+  --input: var(--mist);
+  --ring: var(--gold);
+  --radius: 0.5rem;
+
+  --font-sans: 'Satoshi', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Switzer', var(--font-sans);
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply antialiased;
+    color-scheme: dark;
+    scroll-behavior: smooth;
+    /* Sticky nav (h-16) clearance for hash / scrollIntoView targets */
+    scroll-padding-top: 5rem;
+  }
+
+  section[id] {
+    scroll-margin-top: 5rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground;
+    margin: 0;
+    min-height: 100dvh;
+  }
+
+  #root {
+    min-height: 100dvh;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  h1 {
+    line-height: 1.05;
+  }
+
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+  }
+
+  /* Primary actions use display face */
+  .og-btn {
+    font-family: var(--font-display);
+    font-weight: 600;
+  }
+
+  /* Custom cursor — only while the gold follower is mounted */
+  html.og-cursor-active,
+  html.og-cursor-active * {
+    cursor: none !important;
+  }
+}
+
+@layer utilities {
+  .og-interactive {
+    transition-property: color, background-color, border-color, opacity,
+      transform;
+    transition-duration: 220ms;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .og-interactive:hover {
+    transform: scale(1.02);
+  }
+
+  /* Soft 3D depth accent — flagship / interactive editorial surfaces */
+  .og-depth-surface {
+    transform-style: preserve-3d;
+    transition:
+      transform 320ms cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 250ms cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 320ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .og-depth-surface:hover {
+    transform: translateY(-6px) scale(1.005);
+    box-shadow:
+      0 28px 60px -28px rgb(0 0 0 / 0.9),
+      0 0 0 1px rgb(198 161 91 / 0.12),
+      inset 0 1px 0 rgb(245 244 240 / 0.07);
+  }
+
+  /*
+   * High-end glass — translucent so the WebGL MeshPhysicalMaterial plane
+   * + orb read through; typography stays crisp above.
+   */
+  .og-glass {
+    background: rgb(11 11 10 / 0.28);
+    backdrop-filter: blur(2px) saturate(1.15);
+    -webkit-backdrop-filter: blur(2px) saturate(1.15);
+    box-shadow:
+      0 24px 80px -40px rgb(0 0 0 / 0.9),
+      inset 0 1px 0 rgb(245 244 240 / 0.12),
+      inset 0 0 0 1px rgb(198 161 91 / 0.08);
+  }
+
+  /* Low-power GPU fallback — stronger CSS frost, no WebGL glass meshes */
+  .og-glass-fallback {
+    background: rgb(11 11 10 / 0.78);
+    backdrop-filter: blur(18px) saturate(1.05);
+    -webkit-backdrop-filter: blur(18px) saturate(1.05);
+  }
+
+  /* Subtle RGB fringe along edges (CSS stand-in for dispersion) */
+  .og-glass-chroma {
+    box-shadow:
+      inset 1px 0 0 rgb(198 161 91 / 0.18),
+      inset -1px 0 0 rgb(120 160 200 / 0.12),
+      inset 0 1px 0 rgb(245 244 240 / 0.1);
+  }
+
+  /*
+   * Liquid glass — CTAs / interactive chips.
+   * Gradient rim via border-box trick; soft depth shadow.
+   */
+  .og-liquid-glass {
+    background:
+      linear-gradient(rgb(9 9 11 / 0.42), rgb(9 9 11 / 0.42)) padding-box,
+      linear-gradient(
+          135deg,
+          rgb(212 175 55 / 0.25) 0%,
+          rgb(212 175 55 / 0.06) 42%,
+          transparent 72%
+        )
+        border-box;
+    border: 1px solid transparent;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow:
+      0 18px 48px -24px rgb(0 0 0 / 0.75),
+      inset 0 1px 0 rgb(245 244 240 / 0.1);
+  }
+
+  /* Primary CTA — gold-tinted liquid glass */
+  .og-glass-cta {
+    background:
+      linear-gradient(rgb(198 161 91 / 0.78), rgb(212 175 55 / 0.72)) padding-box,
+      linear-gradient(
+          135deg,
+          rgb(245 244 240 / 0.45) 0%,
+          rgb(212 175 55 / 0.2) 45%,
+          transparent 75%
+        )
+        border-box;
+    border: 1px solid transparent;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow:
+      inset 0 1px 0 rgb(245 244 240 / 0.28),
+      0 14px 36px -14px rgb(212 175 55 / 0.4);
+  }
+
+  .og-glass-cta-fallback {
+    background: var(--primary);
+    border: 1px solid rgb(212 175 55 / 0.35);
+  }
+
+  /*
+   * Boot preloader HUD — glass plate + continuous rim-light sweep.
+   */
+  .og-boot-hud {
+    isolation: isolate;
+    border-radius: 1rem;
+    background:
+      linear-gradient(rgb(9 9 11 / 0.72), rgb(18 14 8 / 0.68)) padding-box,
+      linear-gradient(
+          160deg,
+          rgb(212 175 55 / 0.22) 0%,
+          rgb(212 175 55 / 0.05) 40%,
+          transparent 70%
+        )
+        border-box;
+    border: 1px solid transparent;
+    backdrop-filter: blur(24px) saturate(165%);
+    -webkit-backdrop-filter: blur(24px) saturate(165%);
+    box-shadow:
+      0 28px 80px -36px rgb(0 0 0 / 0.9),
+      inset 0 1px 0 rgb(245 244 240 / 0.08),
+      0 0 40px -12px rgb(245 158 11 / 0.18);
+  }
+
+  /* Soft gold noise tint over the glass */
+  .og-boot-hud::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.14;
+    mix-blend-mode: soft-light;
+    background-image:
+      radial-gradient(circle at 18% 22%, rgb(245 158 11 / 0.35), transparent 42%),
+      radial-gradient(circle at 78% 68%, rgb(212 175 55 / 0.22), transparent 48%),
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+    background-size: auto, auto, 140px 140px;
+  }
+
+  .og-boot-hud::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    pointer-events: none;
+    z-index: 2;
+    background: conic-gradient(
+      from var(--og-boot-rim-angle, 0deg),
+      transparent 0%,
+      rgb(212 175 55 / 0.08) 6%,
+      rgb(245 158 11 / 0.75) 12%,
+      rgb(253 230 138 / 0.95) 16%,
+      rgb(212 175 55 / 0.35) 22%,
+      transparent 34%,
+      transparent 68%,
+      rgb(180 140 60 / 0.2) 78%,
+      transparent 88%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: og-boot-rim-spin 2.8s linear infinite;
+  }
+
+  @keyframes og-boot-rim-spin {
+    to {
+      --og-boot-rim-angle: 360deg;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .og-interactive:hover {
+      transform: none;
+    }
+
+    .og-depth-surface:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    .og-boot-hud::before {
+      animation: none;
+    }
+  }
+}
+
+@property --og-boot-rim-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
