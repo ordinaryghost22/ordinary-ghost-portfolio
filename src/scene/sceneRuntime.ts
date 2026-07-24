@@ -62,12 +62,21 @@ export type OrbFxState = {
   particleSpeed: number
 }
 
+/** Preloader → canvas bridge (read in useFrame, no React re-renders) */
+export type BootLoadState = {
+  /** True while BootOverlay owns the screen (including exit dissolve) */
+  active: boolean
+  /** 0–100 load percentage */
+  progress: number
+}
+
 export type SceneRuntime = {
   audio: AudioBands
   cameraWarp: CameraWarpState
   cameraEntrance: CameraEntranceState
   orbAnchor: OrbAnchorState
   orbFx: OrbFxState
+  boot: BootLoadState
 }
 
 export const sceneRuntimeRef: SceneRuntime = {
@@ -102,6 +111,10 @@ export const sceneRuntimeRef: SceneRuntime = {
   orbFx: {
     bloomBoost: 0,
     particleSpeed: 1,
+  },
+  boot: {
+    active: false,
+    progress: 0,
   },
 }
 
@@ -186,4 +199,14 @@ export function unlockOrbAnchor() {
   anchor.locked = false
   anchor.snap = false
   anchor.lerp = 0.12
+}
+
+export function setBootLoadActive(active: boolean) {
+  sceneRuntimeRef.boot.active = active
+  if (!active) sceneRuntimeRef.boot.progress = 100
+}
+
+/** Drive orb scale / emissive from the HUD counter (0–100). */
+export function setBootLoadProgress(progress: number) {
+  sceneRuntimeRef.boot.progress = Math.min(100, Math.max(0, progress))
 }

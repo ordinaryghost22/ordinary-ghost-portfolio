@@ -61,6 +61,7 @@
 
   --font-sans: 'Satoshi', ui-sans-serif, system-ui, sans-serif;
   --font-display: 'Switzer', var(--font-sans);
+  --font-syne: 'Syne', var(--font-sans);
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 
@@ -108,6 +109,19 @@
 
   h1 {
     line-height: 1.05;
+  }
+
+  /* Hero brand mark — fit glyphs; avoid bg-clip edge clipping */
+  #hero-heading {
+    font-family: var(--font-syne), var(--font-display);
+    overflow: visible;
+    max-width: 100%;
+  }
+
+  #hero-heading span {
+    overflow: visible;
+    /* Extra paint room so the last letter isn't clipped by bg-clip-text */
+    padding-inline-end: 0.08em;
   }
 
   h4 {

@@ -7,12 +7,13 @@ import {
 } from '@react-three/postprocessing'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { BlendFunction } from 'postprocessing'
-import { Suspense, useEffect, useMemo, useRef } from 'react'
+import { memo, Suspense, useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 
 import {
   useEffectiveLowPower,
 } from '@/hooks/useEffectiveLowPower'
+import { useIntro } from '@/hooks/useIntro'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useSceneControls } from '@/hooks/useSceneControls'
 import { AdaptivePerformanceController } from '@/scene/AdaptivePerformanceController'
@@ -194,57 +195,82 @@ function SceneContent() {
 }
 
 /**
+ * WebGL tree — memoized so intro phase / CSS shell updates never re-reconcile
+ * EffectComposer (avoids postprocessing JSON.stringify circular crashes).
+ */
+const WebGLLayer = memo(function WebGLLayer({
+  lowPowerHint,
+}: {
+  lowPowerHint: boolean
+}) {
+  const initialDpr: [number, number] = lowPowerHint ? [1, 1] : [1, 1.5]
+
+  return (
+    <Canvas
+      className="pointer-events-none h-full w-full bg-transparent"
+      style={{
+        pointerEvents: 'none',
+        touchAction: 'pan-y',
+        background: 'transparent',
+      }}
+      dpr={initialDpr}
+      gl={{
+        antialias: !lowPowerHint,
+        alpha: true,
+        premultipliedAlpha: true,
+        powerPreference: lowPowerHint ? 'low-power' : 'high-performance',
+        toneMapping: THREE.ACESFilmicToneMapping,
+        toneMappingExposure: 1.05,
+      }}
+      camera={{
+        position: CAMERA_HOME.position,
+        fov: CAMERA_HOME.fov,
+        near: 0.1,
+        far: 1000,
+      }}
+      frameloop="always"
+      onCreated={({ gl }) => {
+        gl.setClearColor(0x000000, 0)
+      }}
+    >
+      <Suspense fallback={null}>
+        <SceneContent />
+      </Suspense>
+    </Canvas>
+  )
+})
+
+/**
  * Persistent fixed WebGL hero layer — mounts immediately at full opacity.
  * Above ambient grid (z-0), below UI (z-20).
  * Loaded client-side only via React.lazy (Vite equivalent of next/dynamic ssr:false).
  */
 export function SceneCanvas() {
   const lowPowerHint = useEffectiveLowPower()
-  const initialDpr: [number, number] = lowPowerHint ? [1, 1] : [1, 1.5]
-  /** Always ready — no fade gate blocking first paint */
-  const isLoaded = true
+  const { phase, playIntro, heroReady } = useIntro()
+  /** Full-bleed while intro cinema runs; mobile crop only after hero settles */
+  const cinemaOrb = playIntro && !heroReady
 
   return (
     <div
       aria-hidden
-      data-loaded={isLoaded}
+      data-loaded="true"
       className={cn(
         'pointer-events-none fixed inset-0 z-0 bg-transparent',
-        // Dim orb so typography stays focal; stronger on sm+
-        'opacity-40 sm:opacity-70',
-        // Mobile (<768): compact centered orb under badge
-        'max-md:inset-auto max-md:top-12 max-md:left-1/2 max-md:h-[280px] max-md:w-full max-md:max-w-[280px] max-md:-translate-x-1/2 max-md:touch-pan-y',
+        cinemaOrb || phase === 'boot'
+          ? 'opacity-90'
+          : 'max-md:opacity-90 md:opacity-70',
+        !cinemaOrb &&
+          cn(
+            // Mobile: orb sits behind the dense content block (not mid-void)
+            'max-md:inset-auto max-md:top-16 max-md:left-1/2 max-md:h-[min(85vw,360px)] max-md:w-[min(85vw,360px)] max-md:max-w-none max-md:-translate-x-1/2 max-md:touch-pan-y',
+            // Desktop: full-bleed stage
+            'md:inset-0 md:top-0 md:left-0 md:h-full md:w-full md:translate-x-0',
+          ),
       )}
       style={{ pointerEvents: 'none', touchAction: 'pan-y' }}
     >
-      <Canvas
-        className="pointer-events-none h-full w-full bg-transparent"
-        style={{ pointerEvents: 'none', touchAction: 'pan-y', background: 'transparent' }}
-        dpr={initialDpr}
-        gl={{
-          antialias: !lowPowerHint,
-          alpha: true,
-          premultipliedAlpha: true,
-          powerPreference: lowPowerHint ? 'low-power' : 'high-performance',
-          toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.05,
-        }}
-        camera={{
-          // Always start at home so the orb is the visible centerpiece immediately
-          position: CAMERA_HOME.position,
-          fov: CAMERA_HOME.fov,
-          near: 0.1,
-          far: 1000,
-        }}
-        frameloop="always"
-        onCreated={({ gl }) => {
-          gl.setClearColor(0x000000, 0)
-        }}
-      >
-        <Suspense fallback={null}>
-          <SceneContent />
-        </Suspense>
-      </Canvas>
+      <WebGLLayer lowPowerHint={lowPowerHint} />
     </div>
   )
 }

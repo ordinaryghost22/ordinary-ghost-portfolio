@@ -23,7 +23,7 @@ export type IntroContextValue = {
   playIntro: boolean
   heroReady: boolean
   navReady: boolean
-  /** Progress 0–1 while boot overlay is visible */
+  /** Progress 0–1 while boot overlay is visible (coarse; canvas reads sceneRuntime) */
   bootProgress: number
   /** Called by BootOverlay when the counter hits 100% */
   completeBoot: () => void

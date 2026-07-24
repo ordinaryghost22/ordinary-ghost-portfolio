@@ -11,6 +11,7 @@ export type UiSoundId =
   | 'close'
   | 'success'
   | 'warp'
+  | 'shutter'
 
 type UiAudioEngine = {
   ctx: AudioContext
@@ -321,6 +322,25 @@ export async function playUiSound(id: UiSoundId) {
           type: 'sine',
           delay: 0.08,
         })
+        break
+      case 'shutter':
+        // Low-frequency hum + mechanical shutter click at 100%
+        tone(e, {
+          freq: 72,
+          freqEnd: 48,
+          duration: 0.28,
+          gain: 0.07,
+          type: 'sine',
+        })
+        tone(e, {
+          freq: 160,
+          freqEnd: 55,
+          duration: 0.18,
+          gain: 0.045,
+          type: 'triangle',
+          delay: 0.02,
+        })
+        popClick(e)
         break
     }
   } catch {

@@ -46,6 +46,8 @@ export function GeodesicWireShell({
         uOpacity: { value: 0.72 },
         uHover: { value: 0 },
         uMouse: { value: new THREE.Vector2(0, 0) },
+        /** Boot progress emissive lift — 1 at rest, up to ~2 during load */
+        uEmissiveBoost: { value: 1 },
       },
       vertexShader: /* glsl */ `
         uniform float uTime;
@@ -139,6 +141,7 @@ export function GeodesicWireShell({
         uniform vec3 uColor;
         uniform float uOpacity;
         uniform float uHover;
+        uniform float uEmissiveBoost;
 
         varying float vRim;
         varying float vDisplace;
@@ -147,6 +150,7 @@ export function GeodesicWireShell({
           float crest = smoothstep(0.0, 0.1, abs(vDisplace));
           float glow = 0.35 + vRim * 1.15 + crest * 0.25;
           glow *= 1.0 + uHover * 0.55;
+          glow *= uEmissiveBoost;
           vec3 col = uColor * glow;
           float alpha = clamp(
             uOpacity * (0.45 + vRim * 0.7) * (1.0 + uHover * 0.35),
@@ -186,12 +190,21 @@ export function GeodesicWireShell({
     ;(u.uMouse.value as THREE.Vector2).copy(mouseSmooth.current)
 
     const baseOpacity = 0.72 + hoverSmooth.current * 0.18
+    const boot = sceneRuntimeRef.boot
+    const bootT = boot.progress / 100
+    // wireframeEmissiveIntensity ≈ 0.5 + (progress/100)*1.5 while booting
+    const emissiveTarget = boot.active ? 0.5 + bootT * 1.5 : 1
+    u.uEmissiveBoost.value += (emissiveTarget - u.uEmissiveBoost.value) * 0.12
+
     if (audio.enabled) {
       u.uAudioBass.value = audio.bass
       u.uOpacity.value = baseOpacity + audio.level * 0.12
     } else {
       u.uAudioBass.value += (0 - u.uAudioBass.value) * 0.08
-      u.uOpacity.value += (baseOpacity - u.uOpacity.value) * 0.1
+      const opacityTarget = boot.active
+        ? baseOpacity * (0.85 + bootT * 0.35)
+        : baseOpacity
+      u.uOpacity.value += (opacityTarget - u.uOpacity.value) * 0.1
     }
   })
 

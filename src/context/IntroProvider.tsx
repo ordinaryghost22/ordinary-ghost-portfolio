@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 import { useReducedMotion } from 'framer-motion'
 
 import {
-  INTRO_HERO_MS,
   INTRO_NAV_MS,
   INTRO_SETTLE_MS,
   IntroContext,
@@ -71,16 +70,6 @@ export function IntroProvider({ children }: { children: ReactNode }) {
     unlockOrbAnchor()
     resetCameraEntrance()
   }, [reduceMotion])
-
-  // Soft progress mirror while BootOverlay owns the counter (for consumers)
-  useEffect(() => {
-    if (phase !== 'boot' || !playIntro) return
-    // BootOverlay drives precise %, this is a fallback ceiling
-    const id = window.setInterval(() => {
-      setBootProgress((p) => Math.min(0.97, p + 0.02))
-    }, INTRO_HERO_MS / 20)
-    return () => window.clearInterval(id)
-  }, [phase, playIntro])
 
   const value = useMemo<IntroContextValue>(
     () => ({

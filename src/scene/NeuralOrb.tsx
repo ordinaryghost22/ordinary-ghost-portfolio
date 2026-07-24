@@ -83,7 +83,7 @@ export function NeuralOrb({
   const { camera, size, gl } = useThree()
   // Hover tracking active as soon as the canvas mounts (no click / intro gate)
   const pointer = usePointerNDC(!reducedMotion && !lowPower)
-  const mobileScale = isMobile ? 0.7 : 1
+  const mobileScale = isMobile ? 0.95 : 1
 
   const nodeCount =
     nodeCountOverride ?? (lowPower || compact ? 100 : 260)
@@ -404,7 +404,8 @@ export function NeuralOrb({
         default:
           targetPositions.current.set(layouts.sphere)
           state.targetPosX = heroDesktop ? 2 : 0
-          state.targetPosY = 0
+          // Mobile: sit slightly elevated behind the title stack
+          state.targetPosY = heroDesktop ? 0 : compact ? 0.55 : 0
           state.targetPosZ = heroDesktop ? -1.45 : -0.4
           state.targetScale = compact ? 0.82 : heroDesktop ? 1.22 : 0.95
           state.targetOpacity = heroDesktop ? 0.52 : 0.48
@@ -415,13 +416,20 @@ export function NeuralOrb({
       lerpBuffers(current, targetPositions.current, LERP)
     }
 
-    // Preloader lock — center behind card during boot; slide to x:2 on exit
+    // Preloader lock — center behind card; scale/brighten with load %
     if (orbAnchor.locked) {
+      const boot = sceneRuntimeRef.boot
+      const bootT = boot.progress / 100
       state.targetPosX = orbAnchor.x
       state.targetPosY = orbAnchor.y
       state.targetPosZ = orbAnchor.z
-      state.targetScale = compact ? 0.86 : 1.08
-      state.targetOpacity = 0.55
+      // Final mesh scale ≈ 0.8 → 1.2 as progress hits 100%
+      state.targetScale = boot.active
+        ? (0.8 + bootT * 0.4) / ORB_BASE_SCALE
+        : compact
+          ? 0.86
+          : 1.08
+      state.targetOpacity = 0.55 + bootT * 0.2
       state.targetTiltX = 0.08
       state.spinMultiplier = 1
       if (orbAnchor.snap) {
@@ -518,7 +526,7 @@ export function NeuralOrb({
       group.rotation.y += (targetRotY - group.rotation.y) * MOUSE_TILT_LERP
       group.rotation.z += (targetRotZ - group.rotation.z) * MOUSE_TILT_LERP
       group.position.set(state.posX, state.posY, state.posZ)
-      // Mobile (<768): 0.7× so the mesh fits the phone viewport without clipping
+      // Mobile (<768): near-full scale so the centered canvas reads dominant
       group.scale.setScalar(state.scale * mobileScale)
     }
 
