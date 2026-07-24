@@ -2,6 +2,8 @@ import { useFrame } from '@react-three/fiber'
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 
+import { sceneRuntimeRef } from '@/scene/sceneRuntime'
+
 const DUST_COUNT = 180
 
 type AmbientOrbDustProps = {
@@ -78,21 +80,23 @@ export function AmbientOrbDust({
   useFrame((_, delta) => {
     const pts = pointsRef.current
     if (!pts) return
-    phase.current += delta * 0.22
+    const speed = sceneRuntimeRef.orbFx.particleSpeed
+    phase.current += delta * 0.22 * speed
     const attr = pts.geometry.getAttribute('position') as THREE.BufferAttribute
     const arr = attr.array as Float32Array
     const { positions, seeds } = base
     const t = phase.current
+    const amp = 0.045 * (0.85 + speed * 0.35)
 
     for (let i = 0; i < DUST_COUNT; i++) {
       const i3 = i * 3
       const s = seeds[i]
-      arr[i3] = positions[i3] + Math.sin(t + s) * 0.045
-      arr[i3 + 1] = positions[i3 + 1] + Math.cos(t * 0.85 + s) * 0.06
-      arr[i3 + 2] = positions[i3 + 2] + Math.sin(t * 0.7 + s * 1.3) * 0.04
+      arr[i3] = positions[i3] + Math.sin(t + s) * amp
+      arr[i3 + 1] = positions[i3 + 1] + Math.cos(t * 0.85 + s) * amp * 1.3
+      arr[i3 + 2] = positions[i3 + 2] + Math.sin(t * 0.7 + s * 1.3) * amp * 0.9
     }
     attr.needsUpdate = true
-    pts.rotation.y += delta * 0.04
+    pts.rotation.y += delta * 0.04 * speed
   })
 
   if (!visible) return null

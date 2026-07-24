@@ -19,45 +19,96 @@ import { cn } from '@/lib/utils'
 type MagneticCoreProps = {
   children: ReactNode
   className?: string
-  /** Max pull strength in px when cursor is at the element center */
-  strength?: number
-  /** Activation radius from element center (px) */
-  radius?: number
+  /** Class for the outer magnetic motion wrapper */
+  containerClassName?: string
+  /**
+   * Trailing glyph (e.g. →) that travels farther than the shell
+   * for a layered depth effect.
+   */
+  depthGlyph?: ReactNode
   /** Play UI hover/click sounds (respects global mute) */
   sound?: boolean
 }
 
 const baseClass =
-  'inline-flex items-center justify-center will-change-transform'
+  'inline-flex items-center justify-center gap-2 will-change-transform'
 
-const MAGNET_RADIUS = 50
+/** Pull factor for the button shell toward the cursor */
+const SHELL_PULL = 0.2
+/** Icon travels farther than the shell for depth */
+const GLYPH_PULL = 0.38
 
 /**
- * Pull toward cursor only while within `radius` of the element center.
- * Falloff is linear so the button eases back as the pointer leaves.
+ * Translate toward cursor: distance from center × pull factor.
  */
-function pullWithinRadius(
+function magnetOffset(
   event: { clientX: number; clientY: number },
   node: HTMLElement,
-  strength: number,
-  radius: number,
+  pull: number,
 ) {
   const rect = node.getBoundingClientRect()
-  const cx = rect.left + rect.width / 2
-  const cy = rect.top + rect.height / 2
-  const dx = event.clientX - cx
-  const dy = event.clientY - cy
-  const dist = Math.hypot(dx, dy)
-  if (dist > radius || dist < 0.001) {
-    return { x: 0, y: 0, active: dist <= radius }
-  }
-  const t = 1 - dist / radius
-  const eased = t * t
+  const dx = event.clientX - (rect.left + rect.width / 2)
+  const dy = event.clientY - (rect.top + rect.height / 2)
+  return { x: dx * pull, y: dy * pull }
+}
+
+function useMagneticSpring() {
+  const reduceMotion = useReducedMotion()
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
+  const scale = useMotionValue(1)
+  const glyphX = useMotionValue(0)
+  const glyphY = useMotionValue(0)
+  const springX = useSpring(x, springSoft)
+  const springY = useSpring(y, springSoft)
+  const springScale = useSpring(scale, springSnappy)
+  const springGlyphX = useSpring(glyphX, springSoft)
+  const springGlyphY = useSpring(glyphY, springSoft)
   return {
-    x: dx * eased * (strength / radius),
-    y: dy * eased * (strength / radius),
-    active: true,
+    reduceMotion,
+    x,
+    y,
+    scale,
+    glyphX,
+    glyphY,
+    springX,
+    springY,
+    springScale,
+    springGlyphX,
+    springGlyphY,
   }
+}
+
+function MagneticChildren({
+  children,
+  depthGlyph,
+  glyphX,
+  glyphY,
+  reduceMotion,
+}: {
+  children: ReactNode
+  depthGlyph?: ReactNode
+  glyphX: ReturnType<typeof useSpring>
+  glyphY: ReturnType<typeof useSpring>
+  reduceMotion: boolean | null
+}) {
+  if (!depthGlyph) return children
+  return (
+    <>
+      <span className="relative z-[1]">{children}</span>
+      <motion.span
+        aria-hidden
+        className="relative z-[2] inline-flex will-change-transform"
+        style={
+          reduceMotion
+            ? undefined
+            : { x: glyphX, y: glyphY }
+        }
+      >
+        {depthGlyph}
+      </motion.span>
+    </>
+  )
 }
 
 type MagneticLinkProps = MagneticCoreProps &
@@ -66,23 +117,30 @@ type MagneticLinkProps = MagneticCoreProps &
 export function MagneticLink({
   children,
   className,
-  strength = 28,
-  radius = MAGNET_RADIUS,
+  containerClassName,
+  depthGlyph,
   sound = true,
   onClick,
   onPointerEnter,
   onPointerLeave,
   onPointerMove,
+  onPointerDown,
   ...props
 }: MagneticLinkProps) {
-  const reduceMotion = useReducedMotion()
   const nodeRef = useRef<HTMLAnchorElement>(null)
-  const x = useMotionValue(0)
-  const y = useMotionValue(0)
-  const scale = useMotionValue(1)
-  const springX = useSpring(x, springSoft)
-  const springY = useSpring(y, springSoft)
-  const springScale = useSpring(scale, springSnappy)
+  const {
+    reduceMotion,
+    x,
+    y,
+    scale,
+    glyphX,
+    glyphY,
+    springX,
+    springY,
+    springScale,
+    springGlyphX,
+    springGlyphY,
+  } = useMagneticSpring()
 
   return (
     <motion.div
@@ -91,42 +149,55 @@ export function MagneticLink({
           ? undefined
           : { x: springX, y: springY, scale: springScale }
       }
-      className="inline-flex"
+      className={cn('inline-flex', containerClassName)}
     >
       <Link
         {...props}
         ref={nodeRef}
         className={cn(baseClass, className)}
         onPointerEnter={(event) => {
-          if (!reduceMotion) scale.set(1.06)
+          if (!reduceMotion) scale.set(1.05)
           if (sound) void playUiSound('hover')
           onPointerEnter?.(event)
         }}
         onPointerMove={(event) => {
           if (!reduceMotion && nodeRef.current) {
-            const next = pullWithinRadius(
-              event,
-              nodeRef.current,
-              strength,
-              radius,
-            )
-            x.set(next.x)
-            y.set(next.y)
+            const shell = magnetOffset(event, nodeRef.current, SHELL_PULL)
+            x.set(shell.x)
+            y.set(shell.y)
+            if (depthGlyph) {
+              const glyph = magnetOffset(event, nodeRef.current, GLYPH_PULL)
+              glyphX.set(glyph.x - shell.x)
+              glyphY.set(glyph.y - shell.y)
+            }
           }
           onPointerMove?.(event)
         }}
         onPointerLeave={(event) => {
           x.set(0)
           y.set(0)
+          glyphX.set(0)
+          glyphY.set(0)
           scale.set(1)
           onPointerLeave?.(event)
+        }}
+        onPointerDown={(event) => {
+          if (sound) void playUiSound('pop')
+          onPointerDown?.(event)
         }}
         onClick={(event) => {
           if (sound) void playUiSound('click')
           onClick?.(event)
         }}
       >
-        {children}
+        <MagneticChildren
+          depthGlyph={depthGlyph}
+          glyphX={springGlyphX}
+          glyphY={springGlyphY}
+          reduceMotion={reduceMotion}
+        >
+          {children}
+        </MagneticChildren>
       </Link>
     </motion.div>
   )
@@ -138,23 +209,30 @@ type MagneticAnchorProps = MagneticCoreProps &
 export function MagneticAnchor({
   children,
   className,
-  strength = 28,
-  radius = MAGNET_RADIUS,
+  containerClassName,
+  depthGlyph,
   sound = true,
   onClick,
   onPointerEnter,
   onPointerLeave,
   onPointerMove,
+  onPointerDown,
   ...props
 }: MagneticAnchorProps) {
-  const reduceMotion = useReducedMotion()
   const nodeRef = useRef<HTMLAnchorElement>(null)
-  const x = useMotionValue(0)
-  const y = useMotionValue(0)
-  const scale = useMotionValue(1)
-  const springX = useSpring(x, springSoft)
-  const springY = useSpring(y, springSoft)
-  const springScale = useSpring(scale, springSnappy)
+  const {
+    reduceMotion,
+    x,
+    y,
+    scale,
+    glyphX,
+    glyphY,
+    springX,
+    springY,
+    springScale,
+    springGlyphX,
+    springGlyphY,
+  } = useMagneticSpring()
 
   return (
     <motion.div
@@ -163,42 +241,55 @@ export function MagneticAnchor({
           ? undefined
           : { x: springX, y: springY, scale: springScale }
       }
-      className="inline-flex"
+      className={cn('inline-flex', containerClassName)}
     >
       <a
         {...props}
         ref={nodeRef}
         className={cn(baseClass, className)}
         onPointerEnter={(event) => {
-          if (!reduceMotion) scale.set(1.06)
+          if (!reduceMotion) scale.set(1.05)
           if (sound) void playUiSound('hover')
           onPointerEnter?.(event)
         }}
         onPointerMove={(event) => {
           if (!reduceMotion && nodeRef.current) {
-            const next = pullWithinRadius(
-              event,
-              nodeRef.current,
-              strength,
-              radius,
-            )
-            x.set(next.x)
-            y.set(next.y)
+            const shell = magnetOffset(event, nodeRef.current, SHELL_PULL)
+            x.set(shell.x)
+            y.set(shell.y)
+            if (depthGlyph) {
+              const glyph = magnetOffset(event, nodeRef.current, GLYPH_PULL)
+              glyphX.set(glyph.x - shell.x)
+              glyphY.set(glyph.y - shell.y)
+            }
           }
           onPointerMove?.(event)
         }}
         onPointerLeave={(event) => {
           x.set(0)
           y.set(0)
+          glyphX.set(0)
+          glyphY.set(0)
           scale.set(1)
           onPointerLeave?.(event)
+        }}
+        onPointerDown={(event) => {
+          if (sound) void playUiSound('pop')
+          onPointerDown?.(event)
         }}
         onClick={(event) => {
           if (sound) void playUiSound('click')
           onClick?.(event)
         }}
       >
-        {children}
+        <MagneticChildren
+          depthGlyph={depthGlyph}
+          glyphX={springGlyphX}
+          glyphY={springGlyphY}
+          reduceMotion={reduceMotion}
+        >
+          {children}
+        </MagneticChildren>
       </a>
     </motion.div>
   )
@@ -210,24 +301,30 @@ type MagneticNativeButtonProps = MagneticCoreProps &
 export function MagneticNativeButton({
   children,
   className,
-  strength = 28,
-  radius = MAGNET_RADIUS,
+  depthGlyph,
   sound = true,
   type = 'button',
   onClick,
   onPointerEnter,
   onPointerLeave,
   onPointerMove,
+  onPointerDown,
   ...props
 }: MagneticNativeButtonProps) {
-  const reduceMotion = useReducedMotion()
   const nodeRef = useRef<HTMLButtonElement>(null)
-  const x = useMotionValue(0)
-  const y = useMotionValue(0)
-  const scale = useMotionValue(1)
-  const springX = useSpring(x, springSoft)
-  const springY = useSpring(y, springSoft)
-  const springScale = useSpring(scale, springSnappy)
+  const {
+    reduceMotion,
+    x,
+    y,
+    scale,
+    glyphX,
+    glyphY,
+    springX,
+    springY,
+    springScale,
+    springGlyphX,
+    springGlyphY,
+  } = useMagneticSpring()
 
   return (
     <motion.div
@@ -244,35 +341,48 @@ export function MagneticNativeButton({
         ref={nodeRef}
         className={cn(baseClass, className)}
         onPointerEnter={(event) => {
-          if (!reduceMotion) scale.set(1.06)
+          if (!reduceMotion) scale.set(1.05)
           if (sound) void playUiSound('hover')
           onPointerEnter?.(event)
         }}
         onPointerMove={(event) => {
           if (!reduceMotion && nodeRef.current) {
-            const next = pullWithinRadius(
-              event,
-              nodeRef.current,
-              strength,
-              radius,
-            )
-            x.set(next.x)
-            y.set(next.y)
+            const shell = magnetOffset(event, nodeRef.current, SHELL_PULL)
+            x.set(shell.x)
+            y.set(shell.y)
+            if (depthGlyph) {
+              const glyph = magnetOffset(event, nodeRef.current, GLYPH_PULL)
+              glyphX.set(glyph.x - shell.x)
+              glyphY.set(glyph.y - shell.y)
+            }
           }
           onPointerMove?.(event)
         }}
         onPointerLeave={(event) => {
           x.set(0)
           y.set(0)
+          glyphX.set(0)
+          glyphY.set(0)
           scale.set(1)
           onPointerLeave?.(event)
+        }}
+        onPointerDown={(event) => {
+          if (sound) void playUiSound('pop')
+          onPointerDown?.(event)
         }}
         onClick={(event) => {
           if (sound) void playUiSound('click')
           onClick?.(event)
         }}
       >
-        {children}
+        <MagneticChildren
+          depthGlyph={depthGlyph}
+          glyphX={springGlyphX}
+          glyphY={springGlyphY}
+          reduceMotion={reduceMotion}
+        >
+          {children}
+        </MagneticChildren>
       </button>
     </motion.div>
   )

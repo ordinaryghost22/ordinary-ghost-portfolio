@@ -54,38 +54,25 @@ export function Skills() {
           {skillCategories.map((category) => (
             <motion.div
               key={category.label}
-              variants={staggerContainer({
-                stagger: 0.04,
-                delay: 0.02,
+              variants={fadeUp({
+                y: 16,
+                duration: 0.5,
                 reduceMotion: !!reduceMotion,
               })}
+              className="min-w-0"
             >
-              <motion.p
-                variants={fadeUp({
-                  y: 8,
-                  duration: 0.4,
-                  reduceMotion: !!reduceMotion,
-                })}
-                className="border-b border-border/50 pb-3 font-mono text-[11px] tracking-[0.16em] text-primary/80 uppercase"
-              >
+              <p className="border-b border-border/50 pb-3 font-mono text-[11px] tracking-[0.16em] text-primary/80 uppercase">
                 {category.label}
-              </motion.p>
+              </p>
 
               <ul className="mt-4 flex flex-wrap gap-2">
                 {category.items.map((item) => (
-                  <motion.li
-                    key={item}
-                    variants={fadeUp({
-                      y: 6,
-                      duration: 0.35,
-                      reduceMotion: !!reduceMotion,
-                    })}
-                  >
+                  <li key={item} className="min-w-0">
                     <SkillPill
                       skill={item}
                       reduceMotion={!!reduceMotion}
                     />
-                  </motion.li>
+                  </li>
                 ))}
               </ul>
             </motion.div>

@@ -89,7 +89,7 @@ export function SkillPill({ skill, reduceMotion: reduceProp }: SkillPillProps) {
           rotateX.set(-py * 12)
         }}
         className={cn(
-          'og-liquid-glass relative overflow-hidden rounded-full border border-transparent px-3.5 py-1.5',
+          'og-liquid-glass relative overflow-visible rounded-full border border-transparent px-3.5 py-1.5',
           'font-mono text-[11px] tracking-[0.08em] text-foreground/85 uppercase',
           'transition-[border-color,color,box-shadow] duration-250',
           'hover:border-amber-400/60 hover:text-foreground',
@@ -102,12 +102,12 @@ export function SkillPill({ skill, reduceMotion: reduceProp }: SkillPillProps) {
         <motion.span
           aria-hidden
           className={cn(
-            'pointer-events-none absolute inset-0',
+            'pointer-events-none absolute inset-0 overflow-hidden rounded-full',
             reduceMotion ? 'opacity-0' : 'opacity-40',
           )}
           style={{ background: glareBg }}
         />
-        <span className="relative z-[1]">{skill}</span>
+        <span className="relative z-[1] whitespace-nowrap">{skill}</span>
       </button>
     </motion.div>
   )

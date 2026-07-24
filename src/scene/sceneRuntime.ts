@@ -54,11 +54,20 @@ export type OrbAnchorState = {
   lerp: number
 }
 
+/** Cursor-driven FX — bloom / dust speed pulses from mouse velocity */
+export type OrbFxState = {
+  /** Extra bloom intensity 0–1 (settles to 0) */
+  bloomBoost: number
+  /** Multiplier on ambient dust / particle drift (1 = rest) */
+  particleSpeed: number
+}
+
 export type SceneRuntime = {
   audio: AudioBands
   cameraWarp: CameraWarpState
   cameraEntrance: CameraEntranceState
   orbAnchor: OrbAnchorState
+  orbFx: OrbFxState
 }
 
 export const sceneRuntimeRef: SceneRuntime = {
@@ -89,6 +98,10 @@ export const sceneRuntimeRef: SceneRuntime = {
     y: 0,
     z: 0,
     lerp: 0.12,
+  },
+  orbFx: {
+    bloomBoost: 0,
+    particleSpeed: 1,
   },
 }
 

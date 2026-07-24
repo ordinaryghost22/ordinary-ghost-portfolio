@@ -2,13 +2,20 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { ArrowUpRight } from 'lucide-react'
 import { useState } from 'react'
 
+import { MagneticCard } from '@/components/common/MagneticCard'
 import { ProjectHoverPreview } from '@/components/common/ProjectHoverPreview'
 import { RevealText } from '@/components/common/RevealText'
 import { SurfacePanel } from '@/components/common/SurfacePanel'
 import { TextBackdrop } from '@/components/common/TextBackdrop'
 import { useSkillHighlightOptional } from '@/context/skill-highlight-context'
 import { projects, type Project } from '@/data/projects'
+import {
+  useGsapParallaxScrub,
+  useGsapSectionRef,
+  useGsapStaggerReveal,
+} from '@/hooks/useGsapScroll'
 import { skillMatchesStack } from '@/lib/skillMatch'
+import { playUiSound } from '@/lib/uiSounds'
 import {
   VIEWPORT,
   fadeUp,
@@ -61,6 +68,42 @@ function LiveLink({
   )
 }
 
+function MetricsRow({
+  project,
+  compact = false,
+}: {
+  project: Project
+  compact?: boolean
+}) {
+  return (
+    <ul
+      className={cn(
+        'grid gap-3',
+        compact
+          ? 'sm:grid-cols-2'
+          : 'sm:grid-cols-3',
+      )}
+    >
+      {project.metrics.map((metric) => (
+        <li
+          key={`${metric.value}-${metric.label}`}
+          className={cn(
+            'rounded-lg border border-amber-500/15 bg-black/30 px-3 py-3',
+            'backdrop-blur-sm',
+          )}
+        >
+          <p className="font-display text-lg font-semibold tracking-[-0.02em] text-amber-300 sm:text-xl">
+            {metric.value}
+          </p>
+          <p className="mt-1 font-mono text-[10px] leading-snug tracking-[0.08em] text-neutral-400 uppercase">
+            {metric.label}
+          </p>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 function useProjectHighlight(project: Project) {
   const ctx = useSkillHighlightOptional()
   const skill = ctx?.highlightedSkill ?? null
@@ -82,93 +125,106 @@ function FlagshipProject({
   const [hovered, setHovered] = useState(false)
 
   return (
-    <motion.div
-      variants={fadeUp({ reduceMotion })}
-      onPointerEnter={() => setHovered(true)}
-      onPointerLeave={() => setHovered(false)}
-      className={cn(
-        'relative z-0 transform transition-all duration-500 ease-out',
-        'hover:z-10 hover:scale-[1.02]',
-        'hover:shadow-[0_30px_60px_-15px_rgba(245,158,11,0.12)]',
-        dimmed && 'opacity-35 saturate-50',
-        matched && 'opacity-100',
-        reduceMotion && 'hover:scale-100',
-      )}
+    <MagneticCard
+      disabled={reduceMotion}
+      className="gsap-reveal rounded-xl"
     >
-      <ProjectHoverPreview project={hovered ? project : null} />
-      <SurfacePanel
+      <motion.div
+        variants={fadeUp({ reduceMotion })}
+        onPointerEnter={() => {
+          setHovered(true)
+          void playUiSound('hover')
+        }}
+        onPointerLeave={() => setHovered(false)}
+        onPointerDown={() => {
+          void playUiSound('click')
+        }}
         className={cn(
-          'og-depth-surface group rounded-xl border border-amber-500/15 bg-neutral-900/40 p-8 backdrop-blur-md',
-          'transition-all duration-500 ease-out hover:border-amber-400/40',
-          'sm:p-10 lg:p-12',
-          matched &&
-            'border-amber-400/50 shadow-[0_0_40px_-20px_rgb(198_161_91/0.45)]',
+          'relative z-0 transform transition-all duration-500 ease-out',
+          'hover:shadow-[0_30px_60px_-15px_rgba(245,158,11,0.12)]',
+          dimmed && 'opacity-35 saturate-50',
+          matched && 'opacity-100',
         )}
       >
-        <article data-cursor="view">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <span className="font-mono text-[10px] tracking-[0.18em] text-primary uppercase">
-              Flagship
-            </span>
-            <span
-              className="hidden h-3 w-px bg-border sm:block"
-              aria-hidden
-            />
-            <span className="font-mono text-[10px] tracking-[0.14em] text-muted-foreground uppercase">
-              Live in production
-            </span>
-          </div>
+        <ProjectHoverPreview project={hovered ? project : null} />
+        <SurfacePanel
+          className={cn(
+            'og-depth-surface group overflow-hidden rounded-xl border border-amber-500/15 bg-neutral-900/40 p-8 backdrop-blur-md',
+            'transition-all duration-500 ease-out hover:border-amber-400/40',
+            'sm:p-10 lg:p-12',
+            matched &&
+              'border-amber-400/50 shadow-[0_0_40px_-20px_rgb(198_161_91/0.45)]',
+          )}
+        >
+          <article data-cursor="view">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <span className="font-mono text-[10px] tracking-[0.18em] text-primary uppercase">
+                Flagship
+              </span>
+              <span
+                className="hidden h-3 w-px bg-border sm:block"
+                aria-hidden
+              />
+              <span className="font-mono text-[10px] tracking-[0.14em] text-muted-foreground uppercase">
+                Live in production
+              </span>
+            </div>
 
-          <h3 className="mt-6 max-w-3xl font-display text-3xl font-semibold tracking-[-0.03em] text-balance text-foreground sm:text-4xl md:text-[3.25rem] md:leading-[1.05]">
-            {project.title}
-          </h3>
-          <p className="mt-3 font-mono text-xs tracking-[0.12em] text-muted-foreground uppercase">
-            {project.subtitle}
-          </p>
+            <h3 className="mt-6 max-w-3xl font-display text-3xl font-semibold tracking-[-0.03em] text-balance text-foreground sm:text-4xl md:text-[3.25rem] md:leading-[1.05]">
+              {project.title}
+            </h3>
+            <p className="mt-3 font-mono text-xs tracking-[0.12em] text-muted-foreground uppercase">
+              {project.subtitle}
+            </p>
 
-          <p className="mt-7 max-w-2xl text-base leading-relaxed text-pretty text-muted-foreground sm:text-lg">
-            {project.description}
-          </p>
+            <div className="mt-8">
+              <MetricsRow project={project} />
+            </div>
 
-          <ul className="mt-9 grid gap-3 sm:grid-cols-2 sm:gap-x-10 sm:gap-y-3">
-            {project.features.slice(0, 6).map((feature) => (
-              <li
-                key={feature}
-                className="flex gap-3 text-sm leading-snug text-foreground/90"
-              >
-                <span
-                  className="mt-[0.45rem] size-1.5 shrink-0 rounded-full bg-primary"
-                  aria-hidden
-                />
-                {feature}
-              </li>
-            ))}
-          </ul>
+            <p className="mt-7 max-w-2xl text-base leading-relaxed text-pretty text-muted-foreground sm:text-lg">
+              {project.description}
+            </p>
 
-          <div className="mt-11 flex flex-col gap-5 border-t border-border/50 pt-7 sm:flex-row sm:items-center sm:justify-between">
-            <ul className="flex flex-wrap gap-x-3.5 gap-y-1.5">
-              {project.stack.slice(0, 8).map((tech) => {
-                const lit = skill ? skillMatchesStack(skill, [tech]) : false
-                return (
-                  <li
-                    key={tech}
-                    className={cn(
-                      'font-mono text-[10px] tracking-[0.1em] text-muted-foreground uppercase',
-                      lit && 'text-primary',
-                    )}
-                  >
-                    {tech}
-                  </li>
-                )
-              })}
+            <ul className="mt-9 grid gap-3 sm:grid-cols-2 sm:gap-x-10 sm:gap-y-3">
+              {project.features.slice(0, 6).map((feature) => (
+                <li
+                  key={feature}
+                  className="flex gap-3 text-sm leading-snug text-foreground/90"
+                >
+                  <span
+                    className="mt-[0.45rem] size-1.5 shrink-0 rounded-full bg-primary"
+                    aria-hidden
+                  />
+                  {feature}
+                </li>
+              ))}
             </ul>
-            {project.liveUrl ? (
-              <LiveLink href={project.liveUrl} reduceMotion={reduceMotion} />
-            ) : null}
-          </div>
-        </article>
-      </SurfacePanel>
-    </motion.div>
+
+            <div className="mt-11 flex flex-col gap-5 border-t border-border/50 pt-7 sm:flex-row sm:items-center sm:justify-between">
+              <ul className="flex flex-wrap gap-x-3.5 gap-y-1.5">
+                {project.stack.slice(0, 8).map((tech) => {
+                  const lit = skill ? skillMatchesStack(skill, [tech]) : false
+                  return (
+                    <li
+                      key={tech}
+                      className={cn(
+                        'font-mono text-[10px] tracking-[0.1em] text-muted-foreground uppercase',
+                        lit && 'text-primary',
+                      )}
+                    >
+                      {tech}
+                    </li>
+                  )
+                })}
+              </ul>
+              {project.liveUrl ? (
+                <LiveLink href={project.liveUrl} reduceMotion={reduceMotion} />
+              ) : null}
+            </div>
+          </article>
+        </SurfacePanel>
+      </motion.div>
+    </MagneticCard>
   )
 }
 
@@ -185,78 +241,98 @@ function SecondaryProject({
   const [hovered, setHovered] = useState(false)
 
   return (
-    <motion.article
-      data-cursor="view"
-      variants={fadeUp({ reduceMotion })}
-      onPointerEnter={() => setHovered(true)}
-      onPointerLeave={() => setHovered(false)}
-      className={cn(
-        'group relative z-0 transform rounded-xl border border-amber-500/15 bg-neutral-900/40 p-8 backdrop-blur-md',
-        'transition-all duration-500 ease-out',
-        'hover:z-10 hover:scale-[1.02] hover:border-amber-400/40',
-        'hover:shadow-[0_30px_60px_-15px_rgba(245,158,11,0.12)]',
-        dimmed && 'opacity-35 saturate-50',
-        matched &&
-          'border-amber-400/50 opacity-100 shadow-[0_0_28px_-16px_rgb(198_161_91/0.4)]',
-        reduceMotion && 'hover:scale-100',
-      )}
+    <MagneticCard
+      disabled={reduceMotion}
+      className="gsap-reveal rounded-xl"
     >
-      <ProjectHoverPreview project={hovered ? project : null} />
-      <div
-        aria-hidden
+      <motion.article
+        data-cursor="view"
+        variants={fadeUp({ reduceMotion })}
+        onPointerEnter={() => {
+          setHovered(true)
+          void playUiSound('hover')
+        }}
+        onPointerLeave={() => setHovered(false)}
+        onPointerDown={() => {
+          void playUiSound('click')
+        }}
         className={cn(
-          'pointer-events-none absolute top-8 bottom-8 left-0 w-px origin-top scale-y-0 bg-primary transition-transform duration-300 group-hover:scale-y-100',
-          matched && 'scale-y-100',
+          'group relative z-0 overflow-hidden rounded-xl border border-amber-500/15 bg-neutral-900/40 p-8 backdrop-blur-md',
+          'transition-all duration-500 ease-out',
+          'hover:border-amber-400/40',
+          'hover:shadow-[0_30px_60px_-15px_rgba(245,158,11,0.12)]',
+          dimmed && 'opacity-35 saturate-50',
+          matched &&
+            'border-amber-400/50 opacity-100 shadow-[0_0_28px_-16px_rgb(198_161_91/0.4)]',
         )}
-      />
+      >
+        <ProjectHoverPreview project={hovered ? project : null} />
+        <div
+          aria-hidden
+          className={cn(
+            'pointer-events-none absolute top-8 bottom-8 left-0 w-px origin-top scale-y-0 bg-primary transition-transform duration-300 group-hover:scale-y-100',
+            matched && 'scale-y-100',
+          )}
+        />
 
-      <div className="relative z-[1] flex flex-col gap-4 pl-0 transition-[padding] duration-300 group-hover:pl-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="max-w-2xl">
-          <h3 className="font-display text-xl font-semibold tracking-[-0.02em] text-foreground sm:text-2xl">
-            {project.title}
-          </h3>
-          <p className="mt-1.5 font-mono text-xs tracking-[0.1em] text-muted-foreground uppercase">
-            {project.subtitle}
-          </p>
-          <p className="mt-4 text-sm leading-relaxed text-pretty text-muted-foreground sm:text-base">
-            {project.description}
-          </p>
-          <ul className="mt-5 flex flex-wrap gap-x-3 gap-y-1">
-            {project.stack.map((tech) => {
-              const lit = skill ? skillMatchesStack(skill, [tech]) : false
-              return (
-                <li
-                  key={tech}
-                  className={cn(
-                    'font-mono text-[10px] tracking-[0.1em] text-muted-foreground/80 uppercase',
-                    lit && 'text-primary',
-                  )}
-                >
-                  {tech}
-                </li>
-              )
-            })}
-          </ul>
+        <div className="relative z-[1] flex flex-col gap-5 pl-0 transition-[padding] duration-300 group-hover:pl-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="max-w-2xl">
+            <h3 className="font-display text-xl font-semibold tracking-[-0.02em] text-foreground sm:text-2xl">
+              {project.title}
+            </h3>
+            <p className="mt-1.5 font-mono text-xs tracking-[0.1em] text-muted-foreground uppercase">
+              {project.subtitle}
+            </p>
+
+            <div className="mt-5">
+              <MetricsRow project={project} compact />
+            </div>
+
+            <p className="mt-5 text-sm leading-relaxed text-pretty text-muted-foreground sm:text-base">
+              {project.description}
+            </p>
+            <ul className="mt-5 flex flex-wrap gap-x-3 gap-y-1">
+              {project.stack.map((tech) => {
+                const lit = skill ? skillMatchesStack(skill, [tech]) : false
+                return (
+                  <li
+                    key={tech}
+                    className={cn(
+                      'font-mono text-[10px] tracking-[0.1em] text-muted-foreground/80 uppercase',
+                      lit && 'text-primary',
+                    )}
+                  >
+                    {tech}
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+          {project.liveUrl ? (
+            <LiveLink
+              href={project.liveUrl}
+              reduceMotion={reduceMotion}
+              className="shrink-0"
+            />
+          ) : null}
         </div>
-        {project.liveUrl ? (
-          <LiveLink
-            href={project.liveUrl}
-            reduceMotion={reduceMotion}
-            className="shrink-0"
-          />
-        ) : null}
-      </div>
-    </motion.article>
+      </motion.article>
+    </MagneticCard>
   )
 }
 
 export function Projects() {
   const reduceMotion = useReducedMotion()
+  const sectionRef = useGsapSectionRef<HTMLElement>()
   const flagship = projects.find((p) => p.flagship) ?? projects[0]
   const secondary = projects.filter((p) => p.title !== flagship.title)
 
+  useGsapStaggerReveal(sectionRef, '.gsap-reveal')
+  useGsapParallaxScrub(sectionRef, '.gsap-parallax', 36)
+
   return (
     <motion.section
+      ref={sectionRef}
       id="projects"
       aria-labelledby="projects-heading"
       className="relative z-[1] border-t border-border/60"
@@ -268,7 +344,7 @@ export function Projects() {
       viewport={VIEWPORT}
     >
       <div className="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6 sm:py-28 lg:px-8">
-        <TextBackdrop className="max-w-2xl">
+        <TextBackdrop className="gsap-parallax max-w-2xl">
           <RevealText
             as="p"
             className="font-mono text-xs tracking-[0.18em] text-primary uppercase"

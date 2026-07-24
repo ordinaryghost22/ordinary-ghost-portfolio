@@ -61,6 +61,7 @@ export function Resume() {
               target="_blank"
               rel="noopener noreferrer"
               data-magnetic
+              depthGlyph={<Download className="size-4" aria-hidden />}
               className={cn(
                 'og-btn og-interactive inline-flex h-11 items-center gap-2 rounded-full px-6 text-sm text-primary-foreground',
                 lowPower ? 'og-glass-cta-fallback' : 'og-glass-cta',
@@ -68,7 +69,6 @@ export function Resume() {
                 'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none',
               )}
             >
-              <Download className="size-4" aria-hidden />
               Download CV (PDF)
             </MagneticAnchor>
           </RevealText>

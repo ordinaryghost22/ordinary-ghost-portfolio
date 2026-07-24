@@ -4,6 +4,7 @@ import { useEffect, useId, useState, type MouseEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { MagneticLink } from '@/components/common'
+import { SoundToggle } from '@/components/common/SoundToggle'
 import { useIntro } from '@/hooks/useIntro'
 import { ctaItem, navItems, type NavItem } from '@/data/navigation'
 import { useActiveSection } from '@/hooks/useActiveSection'
@@ -113,6 +114,7 @@ function CtaButton({ onNavigate, className }: CtaButtonProps) {
         })
         onNavigate?.()
       }}
+      depthGlyph={<span className="text-[0.95em]">→</span>}
       className={cn(
         'og-btn og-interactive h-11 gap-2 rounded-full px-6 text-sm text-primary-foreground',
         lowPower ? 'og-glass-cta-fallback' : 'og-glass-cta',
@@ -260,6 +262,8 @@ export function Navbar() {
             reduceMotion: !useEntrance,
           })}
         >
+          <SoundToggle className="hidden sm:inline-flex" />
+
           <div className="hidden md:block">
             <CtaButton />
           </div>
@@ -274,7 +278,10 @@ export function Navbar() {
             aria-expanded={mobileOpen}
             aria-controls={menuId}
             aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-            onClick={() => setMobileOpen((open) => !open)}
+            onClick={() => {
+              void playUiSound(mobileOpen ? 'close' : 'open')
+              setMobileOpen((open) => !open)
+            }}
           >
             {mobileOpen ? (
               <X className="size-5" aria-hidden />
@@ -300,6 +307,9 @@ export function Navbar() {
             className="relative border-t border-border md:hidden"
           >
             <div className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-4 sm:px-6">
+              <div className="mb-2 flex justify-end px-1 sm:hidden">
+                <SoundToggle />
+              </div>
               {navItems.map((item) => (
                 <NavLinkItem
                   key={item.label}

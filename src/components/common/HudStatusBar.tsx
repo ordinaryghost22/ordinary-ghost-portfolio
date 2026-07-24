@@ -60,7 +60,8 @@ export function HudStatusBar({
         'font-mono text-[9px] tracking-[0.16em] text-white/30 uppercase sm:text-[10px]',
         variant === 'footer' &&
           'justify-between border border-border/40 bg-foreground/[0.02] px-3 py-2 sm:px-4',
-        variant === 'hero' && 'pointer-events-none justify-start opacity-80',
+        variant === 'hero' &&
+          'pointer-events-none justify-between opacity-80 max-md:text-[10px] max-md:normal-case max-md:tracking-normal max-md:text-neutral-500 md:justify-start',
         className,
       )}
     >
@@ -80,7 +81,10 @@ export function HudStatusBar({
           className="size-1.5 rounded-full bg-emerald-400/80 shadow-[0_0_8px_rgb(52_211_153/0.55)]"
           aria-hidden
         />
-        <span className="text-foreground/50">Online / Available for hire</span>
+        <span className="text-foreground/50 max-md:hidden">
+          Online / Available for hire
+        </span>
+        <span className="text-foreground/50 md:hidden">ONLINE</span>
       </span>
 
       {variant === 'footer' ? (

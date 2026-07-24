@@ -27,7 +27,7 @@ import { sceneRuntimeRef } from '@/scene/sceneRuntime'
 
 const GOLD = new THREE.Color('#C6A15B')
 const LERP = 0.05
-const MOUSE_TILT_LERP = 0.075
+const MOUSE_TILT_LERP = 0.05
 const MORPH_LERP = 0.045
 const RADIUS = 1.55
 
@@ -40,8 +40,11 @@ const CONVERGE_DURATION_S = 1.85
 const HOVER_RADIUS_NDC = 0.55
 /** ~7% scale lift while hovered (e.g. 0.70 → 0.75 feel) */
 const HOVER_SCALE_BOOST = 0.072
-const TILT_FOLLOW_X = 0.36
-const TILT_FOLLOW_Y = 0.46
+const TILT_FOLLOW_X = 0.42
+const TILT_FOLLOW_Y = 0.55
+/** NDC speed above this triggers a bloom / particle burst */
+const SPEED_BURST_THRESHOLD = 0.004
+const SPEED_BURST_GAIN = 18
 
 type NeuralOrbProps = {
   reducedMotion: boolean
@@ -73,11 +76,14 @@ export function NeuralOrb({
 }: NeuralOrbProps) {
   const { morphShape } = useSceneControls()
   const compact = useMediaQuery('(max-width: 640px)')
+  /** Tailwind `md` breakpoint — mobile-only scale; desktop path untouched */
+  const isMobile = useMediaQuery('(max-width: 767px)')
   const desktop = useMediaQuery('(min-width: 1024px)')
   const invalidate = useThree((s) => s.invalidate)
   const { camera, size, gl } = useThree()
   // Hover tracking active as soon as the canvas mounts (no click / intro gate)
   const pointer = usePointerNDC(!reducedMotion && !lowPower)
+  const mobileScale = isMobile ? 0.7 : 1
 
   const nodeCount =
     nodeCountOverride ?? (lowPower || compact ? 100 : 260)
@@ -426,8 +432,10 @@ export function NeuralOrb({
       }
     }
 
-    // —— Mouse follow / tilt + proximity hover (document pointer, canvas is pe:none) ——
+    // —— Mouse follow / inertial tilt + velocity burst ——
     let targetHover = 0
+    const fx = sceneRuntimeRef.orbFx
+
     if (ptr.active && groupRef.current && !orbAnchor.locked) {
       projected.current.set(state.posX, state.posY, state.posZ)
       projected.current.project(camera)
@@ -436,15 +444,26 @@ export function NeuralOrb({
       const dist = Math.hypot(dx, dy)
       targetHover = THREE.MathUtils.clamp(1 - dist / HOVER_RADIUS_NDC, 0, 1)
 
-      // Stronger tilt when near the orb; still follows softly at distance
-      const follow = 0.35 + targetHover * 0.65
+      // Inertial lerp toward normalized mouse (-1…1)
+      const follow = 0.4 + targetHover * 0.6
       const aimTiltX = ptr.y * TILT_FOLLOW_X * follow
       const aimTiltY = ptr.x * TILT_FOLLOW_Y * follow
       state.mouseTiltX += (aimTiltX - state.mouseTiltX) * MOUSE_TILT_LERP
       state.mouseTiltY += (aimTiltY - state.mouseTiltY) * MOUSE_TILT_LERP
+
+      // Fast sweeps across hero → bloom + particle pulse, then settle
+      const burst = THREE.MathUtils.clamp(
+        (ptr.speed - SPEED_BURST_THRESHOLD) * SPEED_BURST_GAIN,
+        0,
+        1,
+      )
+      fx.bloomBoost += (burst - fx.bloomBoost) * 0.12
+      fx.particleSpeed += (1 + burst * 2.4 - fx.particleSpeed) * 0.1
     } else {
       state.mouseTiltX += (0 - state.mouseTiltX) * MOUSE_TILT_LERP
       state.mouseTiltY += (0 - state.mouseTiltY) * MOUSE_TILT_LERP
+      fx.bloomBoost += (0 - fx.bloomBoost) * 0.08
+      fx.particleSpeed += (1 - fx.particleSpeed) * 0.08
     }
     state.hoverAmount += (targetHover - state.hoverAmount) * MOUSE_TILT_LERP
 
@@ -452,7 +471,7 @@ export function NeuralOrb({
     hoverRef.current.x = ptr.active ? ptr.x : hoverRef.current.x * 0.92
     hoverRef.current.y = ptr.active ? ptr.y : hoverRef.current.y * 0.92
 
-    const hoverSpin = 1 + state.hoverAmount * 0.45
+    const hoverSpin = 1 + state.hoverAmount * 0.45 + fx.bloomBoost * 0.35
     const hoverScale = 1 + state.hoverAmount * HOVER_SCALE_BOOST
     const audio = sceneRuntimeRef.audio
     const audioSpin = audio.enabled ? 1 + audio.bass * 0.35 : 1
@@ -463,7 +482,11 @@ export function NeuralOrb({
     const posLerp = orbAnchor.locked ? orbAnchor.lerp : LERP
     // Continuous idle spin from first frame — not gated by scroll or hover
     state.spinY +=
-      IDLE_SPIN_PER_FRAME * state.spinMultiplier * hoverSpin * audioSpin
+      IDLE_SPIN_PER_FRAME *
+      state.spinMultiplier *
+      hoverSpin *
+      audioSpin *
+      (1 + (fx.particleSpeed - 1) * 0.25)
     state.tiltX += (state.targetTiltX - state.tiltX) * LERP
     state.posX += (state.targetPosX - state.posX) * posLerp
     state.posY += (state.targetPosY - state.posY) * posLerp
@@ -481,16 +504,22 @@ export function NeuralOrb({
         baseSize *
         (1 +
           (audio.enabled ? audio.treble * 0.35 : 0) +
-          state.hoverAmount * 0.2)
+          state.hoverAmount * 0.2 +
+          fx.bloomBoost * 0.45)
     }
 
     const group = groupRef.current
     if (group) {
-      group.rotation.x = state.tiltX + state.mouseTiltX
-      group.rotation.y = state.spinY + state.mouseTiltY * 0.35
-      group.rotation.z = state.mouseTiltY * 0.12
+      // Inertial rotation toward mouse-augmented targets (lerp factor 0.05)
+      const targetRotX = state.tiltX + state.mouseTiltX
+      const targetRotY = state.spinY + state.mouseTiltY
+      const targetRotZ = state.mouseTiltY * 0.12
+      group.rotation.x += (targetRotX - group.rotation.x) * MOUSE_TILT_LERP
+      group.rotation.y += (targetRotY - group.rotation.y) * MOUSE_TILT_LERP
+      group.rotation.z += (targetRotZ - group.rotation.z) * MOUSE_TILT_LERP
       group.position.set(state.posX, state.posY, state.posZ)
-      group.scale.setScalar(state.scale)
+      // Mobile (<768): 0.7× so the mesh fits the phone viewport without clipping
+      group.scale.setScalar(state.scale * mobileScale)
     }
 
     void size.width
@@ -550,7 +579,7 @@ export function NeuralOrb({
       group.rotation.y = 0.35
       group.position.set(desktop ? 1.6 : 0, 0.05, desktop ? -1.2 : 0)
       group.scale.setScalar(
-        (compact ? 0.78 : desktop ? 1.05 : 0.92) * ORB_BASE_SCALE,
+        (compact ? 0.78 : desktop ? 1.05 : 0.92) * ORB_BASE_SCALE * mobileScale,
       )
     }
     pointsMat.uniforms.uOpacity.value = 0.55
@@ -564,6 +593,7 @@ export function NeuralOrb({
     reducedMotion,
     compact,
     desktop,
+    mobileScale,
     pointsGeo,
     linesGeo,
     pointsMat,

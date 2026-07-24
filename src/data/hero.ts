@@ -9,7 +9,7 @@ export const heroContent = {
   description:
     'Architecting autonomous AI workflows, high-performance web systems, and scalable SaaS platforms engineered for maximum impact.',
   primaryCta: {
-    label: 'Explore Works →',
+    label: 'Explore Works',
     href: '/#projects',
   },
   secondaryCta: {

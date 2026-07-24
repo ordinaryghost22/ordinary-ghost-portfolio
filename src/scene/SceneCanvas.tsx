@@ -24,6 +24,7 @@ import { NeuralOrb } from '@/scene/NeuralOrb'
 import { OrbitingPointLight } from '@/scene/OrbitingPointLight'
 import { POST_FX_PARAMS } from '@/scene/orbVisualParams'
 import { CAMERA_HOME, sceneRuntimeRef } from '@/scene/sceneRuntime'
+import { cn } from '@/lib/utils'
 
 function SceneLighting({
   reducedMotion,
@@ -74,6 +75,7 @@ function SceneLighting({
 
 function PremiumEffects({ enabled }: { enabled: boolean }) {
   const offset = useRef(new THREE.Vector2(0, 0))
+  const bloomRef = useRef<{ intensity: number } | null>(null)
 
   useFrame(() => {
     const blur = sceneRuntimeRef.cameraEntrance.blur
@@ -82,6 +84,11 @@ function PremiumEffects({ enabled }: { enabled: boolean }) {
       base.x + blur * 0.0028,
       base.y + blur * 0.0012,
     )
+    if (bloomRef.current) {
+      const boost = sceneRuntimeRef.orbFx.bloomBoost
+      bloomRef.current.intensity =
+        POST_FX_PARAMS.bloom.intensity * (1 + boost * 0.85)
+    }
   })
 
   if (!enabled) return null
@@ -91,6 +98,7 @@ function PremiumEffects({ enabled }: { enabled: boolean }) {
   return (
     <EffectComposer multisampling={0} enableNormalPass={false}>
       <Bloom
+        ref={bloomRef as never}
         intensity={bloom.intensity}
         luminanceThreshold={bloom.luminanceThreshold}
         luminanceSmoothing={bloom.luminanceSmoothing}
@@ -200,12 +208,18 @@ export function SceneCanvas() {
     <div
       aria-hidden
       data-loaded={isLoaded}
-      className="pointer-events-none fixed inset-0 z-10 bg-transparent opacity-100"
-      style={{ pointerEvents: 'none' }}
+      className={cn(
+        'pointer-events-none fixed inset-0 z-0 bg-transparent',
+        // Dim orb so typography stays focal; stronger on sm+
+        'opacity-40 sm:opacity-70',
+        // Mobile (<768): compact centered orb under badge
+        'max-md:inset-auto max-md:top-12 max-md:left-1/2 max-md:h-[280px] max-md:w-full max-md:max-w-[280px] max-md:-translate-x-1/2 max-md:touch-pan-y',
+      )}
+      style={{ pointerEvents: 'none', touchAction: 'pan-y' }}
     >
       <Canvas
         className="pointer-events-none h-full w-full bg-transparent"
-        style={{ pointerEvents: 'none', background: 'transparent' }}
+        style={{ pointerEvents: 'none', touchAction: 'pan-y', background: 'transparent' }}
         dpr={initialDpr}
         gl={{
           antialias: !lowPowerHint,

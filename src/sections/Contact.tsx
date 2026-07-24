@@ -11,6 +11,11 @@ import {
   socialBadgeClassName,
   socialLinks,
 } from '@/data/contact'
+import {
+  useGsapParallaxScrub,
+  useGsapSectionRef,
+  useGsapStaggerReveal,
+} from '@/hooks/useGsapScroll'
 import { playUiSound } from '@/lib/uiSounds'
 import { VIEWPORT, fadeUp, staggerContainer } from '@/lib/motion'
 import { cn } from '@/lib/utils'
@@ -58,9 +63,14 @@ function CopyEmailButton() {
 
 export function Contact() {
   const reduceMotion = useReducedMotion()
+  const sectionRef = useGsapSectionRef<HTMLElement>()
+
+  useGsapStaggerReveal(sectionRef, '.gsap-reveal')
+  useGsapParallaxScrub(sectionRef, '.gsap-parallax', 28)
 
   return (
     <motion.section
+      ref={sectionRef}
       id="contact"
       aria-labelledby="contact-heading"
       className="relative z-[1] border-t border-border/60"
@@ -72,7 +82,7 @@ export function Contact() {
       viewport={VIEWPORT}
     >
       <div className="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8">
-        <TextBackdrop className="max-w-3xl">
+        <TextBackdrop className="gsap-parallax max-w-3xl">
           <RevealText
             as="p"
             className="font-mono text-xs tracking-[0.18em] text-primary uppercase"
@@ -98,7 +108,7 @@ export function Contact() {
 
           <motion.div
             variants={fadeUp({ reduceMotion: !!reduceMotion })}
-            className="mt-12 flex flex-wrap items-center gap-3"
+            className="gsap-reveal mt-12 flex flex-wrap items-center gap-3"
           >
             <MagneticAnchor
               href={`mailto:${CONTACT_EMAIL}`}
@@ -116,7 +126,7 @@ export function Contact() {
 
           <motion.div
             variants={fadeUp({ reduceMotion: !!reduceMotion })}
-            className="mt-5"
+            className="gsap-reveal mt-5"
           >
             <a
               href={CONTACT_WHATSAPP_HREF}
@@ -147,7 +157,7 @@ export function Contact() {
 
           <motion.ul
             variants={fadeUp({ reduceMotion: !!reduceMotion })}
-            className="mt-10 flex flex-wrap gap-3"
+            className="gsap-reveal mt-10 flex flex-wrap gap-3"
           >
             {socialLinks.map((link) => {
               const Icon = link.icon

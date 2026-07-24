@@ -36,7 +36,7 @@ export function RootLayout({ className }: RootLayoutProps) {
             <AmbientSceneBackdrop />
             <GrainOverlay />
 
-            {/* z-10: 3D canvas — lazy client mount, visible immediately */}
+            {/* z-0: 3D canvas — ambient behind UI (dimmed for text contrast) */}
             <Suspense fallback={null}>
               <SceneCanvas />
             </Suspense>

@@ -11,6 +11,8 @@ export {
   MagneticLink,
   MagneticNativeButton,
 } from './MagneticButton'
+export { MagneticCard } from './MagneticCard'
+export { SoundToggle } from './SoundToggle'
 export { ProjectHoverPreview } from './ProjectHoverPreview'
 export { RevealText } from './RevealText'
 export { MotionItem, SectionReveal } from './SectionReveal'

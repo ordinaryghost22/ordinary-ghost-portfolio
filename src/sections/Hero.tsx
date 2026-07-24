@@ -5,13 +5,12 @@ import {
   DecryptText,
   MagneticAnchor,
   MagneticLink,
-  TextBackdrop,
   Typewriter,
 } from '@/components/common'
 import { HudStatusBar } from '@/components/common/HudStatusBar'
 import { useIntro } from '@/hooks/useIntro'
 import { useEffectiveLowPower } from '@/hooks/useEffectiveLowPower'
-import { socialLinks } from '@/data/contact'
+import { socialBadgeClassName, socialLinks } from '@/data/contact'
 import { heroContent } from '@/data/hero'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import {
@@ -58,17 +57,23 @@ function HeroHudLabels() {
 
 const ctaClass = {
   primary: cn(
-    'og-btn og-interactive h-11 gap-2 rounded-full px-6 text-sm text-primary-foreground',
+    'og-btn og-interactive h-11 gap-2 rounded-full px-5',
+    'font-mono text-xs font-medium tracking-wider text-primary-foreground uppercase',
     'hover:brightness-110',
     'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none',
+    'max-md:min-w-0 max-md:flex-1 max-md:justify-center',
   ),
   secondary: cn(
-    'og-btn og-interactive h-11 gap-2 rounded-full px-6 text-sm text-foreground',
+    'og-btn og-interactive h-11 gap-2 rounded-full px-5',
+    'font-mono text-xs font-medium tracking-wider text-foreground uppercase',
     'border border-amber-500/20 bg-white/5 backdrop-blur-md',
     'hover:border-amber-400/50 hover:bg-amber-400/10 transition-all',
     'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none',
+    'max-md:min-w-0 max-md:flex-1 max-md:justify-center',
   ),
 }
+
+const HERO_TEXT_SHADOW = 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]'
 
 const TYPE_SPEED_MS = 18
 
@@ -114,12 +119,8 @@ export function Hero() {
     <section
       id="home"
       aria-labelledby="hero-heading"
-      className="relative flex min-h-[calc(100dvh-4rem)] items-center overflow-hidden bg-transparent"
+      className="relative flex min-h-[calc(100dvh-4rem)] items-center overflow-hidden bg-transparent pt-4 md:pt-0"
     >
-      {/*
-        Hard-hide hero UI while the preloader is up (opacity 0 + no hits).
-        Fade in only after boot exit completes (phase leaves 'boot').
-      */}
       <motion.div
         className="absolute inset-0 z-20"
         initial={false}
@@ -133,202 +134,234 @@ export function Hero() {
       >
         <HeroHudLabels />
 
-        {/*
-          Asymmetric 5 / 7 split: copy at z-20, right rail reserves space for
-          the fixed WebGL orb (root z-10) so typography never fights the mesh.
-        */}
-        <div className="relative z-20 mx-auto grid w-full max-w-6xl grid-cols-1 items-center px-4 py-20 sm:px-6 sm:py-24 lg:grid-cols-12 lg:gap-10 lg:px-8 lg:py-28">
-          <TextBackdrop className="mx-auto w-full max-w-xl text-center lg:col-span-5 lg:mx-0 lg:max-w-none lg:text-left">
-            <motion.div
-              variants={staggerContainer({
-                reduceMotion: !useEntrance,
-                compact,
-              })}
-              initial={useEntrance ? 'hidden' : false}
-              animate={heroReady || !useEntrance ? 'visible' : 'hidden'}
+        <div className="mx-auto grid min-h-[calc(100vh-80px)] w-full max-w-7xl grid-cols-1 items-center gap-8 px-6 py-12 lg:grid-cols-12">
+          {/* Left — glass HUD copy card */}
+          <div className="z-10 lg:col-span-5">
+            <div
+              className={cn(
+                'relative overflow-hidden rounded-3xl border border-neutral-800/80',
+                'bg-neutral-950/75 p-6 shadow-[0_0_50px_rgba(0,0,0,0.8)] backdrop-blur-2xl sm:p-8',
+                // Golden top-edge accent
+                'after:absolute after:top-0 after:left-1/4 after:h-px after:w-1/2',
+                'after:bg-gradient-to-r after:from-transparent after:via-amber-400/60 after:to-transparent',
+              )}
             >
-              <motion.div
-                variants={fadeUp({
-                  reduceMotion: !useEntrance,
-                })}
-                className="flex justify-center lg:justify-start"
-              >
-                <span
-                  className={cn(
-                    'inline-flex max-w-full items-center rounded-full border border-primary/30',
-                    'bg-primary/10 px-3 py-1.5 font-mono text-[9px] tracking-[0.14em] text-primary uppercase sm:text-[10px]',
-                    'shadow-[0_0_20px_-4px_rgb(198_161_91/0.55)]',
-                  )}
+              <div className="relative z-[1] flex flex-col items-start text-left">
+                <motion.div
+                  variants={staggerContainer({
+                    reduceMotion: !useEntrance,
+                    compact,
+                  })}
+                  initial={useEntrance ? 'hidden' : false}
+                  animate={heroReady || !useEntrance ? 'visible' : 'hidden'}
                 >
-                  <span
-                    className="mr-2 inline-block h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-amber-400"
-                    aria-hidden
-                  />
-                  <span className="truncate">{heroContent.badge}</span>
-                </span>
-              </motion.div>
-
-              <motion.div
-                variants={fadeUp({
-                  reduceMotion: !useEntrance,
-                })}
-                className="mt-5 sm:mt-6"
-              >
-                <DecryptText
-                  as="h1"
-                  id="hero-heading"
-                  text={heroContent.headline}
-                  tickMs={compact ? 20 : 26}
-                  delayMs={0}
-                  active={heroReady && useEntrance}
-                  className={cn(
-                    'font-display text-5xl font-bold tracking-[-0.03em] leading-[0.85] text-balance lg:text-7xl',
-                    'bg-[linear-gradient(105deg,#ffffff_0%,#f5f4f0_22%,#c6a15b_52%,#f5f4f0_78%,#ffffff_100%)]',
-                    'bg-clip-text text-transparent',
-                    '[background-size:140%_100%]',
-                  )}
-                />
-                <p
-                  className={cn(
-                    'my-3 border-l-2 border-amber-500/50 pl-3',
-                    'font-mono text-sm text-neutral-400',
-                    'text-left',
-                  )}
-                >
-                  {heroContent.founderLine}
-                </p>
-              </motion.div>
-
-              <motion.ul
-                variants={staggerContainer({
-                  stagger: compact ? 0.04 : 0.05,
-                  delay: 0.02,
-                  reduceMotion: !useEntrance,
-                  compact,
-                })}
-                className="my-4 flex flex-wrap items-center justify-center gap-3 lg:justify-start"
-              >
-                {heroContent.roles.map((role, index) => (
-                  <motion.li
-                    key={role}
+                  <motion.div
                     variants={fadeUp({
                       reduceMotion: !useEntrance,
-                      y: 10,
-                      duration: 0.45,
                     })}
+                    className="flex justify-start"
                   >
                     <span
                       className={cn(
-                        'font-mono text-xs uppercase tracking-widest',
-                        index === 0
-                          ? 'border-l-2 border-amber-400 bg-amber-400/10 px-3 py-1.5 font-semibold text-amber-300 [clip-path:polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,0_100%)]'
-                          : 'border-b border-neutral-700/80 px-2 py-1 text-neutral-400 transition-colors hover:border-amber-400/50 hover:text-amber-300',
+                        'inline-flex max-w-full items-center rounded-full border border-primary/30',
+                        'bg-primary/10 px-3 py-1.5 font-mono text-[9px] tracking-[0.14em] text-primary uppercase sm:text-[10px]',
+                        'shadow-[0_0_20px_-4px_rgb(198_161_91/0.55)]',
+                        HERO_TEXT_SHADOW,
                       )}
                     >
-                      {role}
+                      <span
+                        className="mr-2 inline-block h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-amber-400"
+                        aria-hidden
+                      />
+                      <span className="truncate">{heroContent.badge}</span>
                     </span>
-                  </motion.li>
-                ))}
-              </motion.ul>
-            </motion.div>
+                  </motion.div>
 
-            <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-pretty text-muted-foreground sm:mt-8 sm:text-lg lg:mx-0">
-              <Typewriter
-                text={heroContent.description}
-                speed={TYPE_SPEED_MS}
-                startDelay={typewriterStartMs}
-                enabled={useEntrance}
-                active={heroReady}
-                className="text-center lg:text-left"
-              />
-            </p>
-
-            <motion.div
-              variants={fadeUp({
-                reduceMotion: !useEntrance,
-                delay: buttonsDelaySec,
-              })}
-              initial={useEntrance ? 'hidden' : false}
-              animate={heroReady || !useEntrance ? 'visible' : 'hidden'}
-              className="mt-10 flex flex-col items-center justify-center gap-3 sm:mt-12 sm:flex-row lg:justify-start"
-            >
-              <MagneticLink
-                to={heroContent.primaryCta.href}
-                data-cursor="view"
-                data-magnetic
-                className={cn(
-                  ctaClass.primary,
-                  lowPower ? 'og-glass-cta-fallback' : 'og-glass-cta',
-                )}
-                onClick={(event) => {
-                  event.preventDefault()
-                  navigate(heroContent.primaryCta.href)
-                  requestAnimationFrame(() => {
-                    navigateWithCameraWarp(
-                      sectionIdFromHref(heroContent.primaryCta.href),
-                    )
-                  })
-                }}
-              >
-                {heroContent.primaryCta.label}
-              </MagneticLink>
-
-              <MagneticAnchor
-                href={heroContent.secondaryCta.href}
-                download={heroContent.secondaryCta.download}
-                target="_blank"
-                rel="noopener noreferrer"
-                data-magnetic
-                className={ctaClass.secondary}
-              >
-                {heroContent.secondaryCta.label}
-              </MagneticAnchor>
-            </motion.div>
-
-            <motion.ul
-              variants={fadeUp({
-                reduceMotion: !useEntrance,
-                delay: socialDelaySec,
-              })}
-              initial={useEntrance ? 'hidden' : false}
-              animate={heroReady || !useEntrance ? 'visible' : 'hidden'}
-              className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 lg:justify-start"
-            >
-              {socialLinks.map((link) => (
-                <li key={link.label}>
-                  <a
-                    href={link.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    data-magnetic
-                    onPointerEnter={() => {
-                      void playUiSound('hover')
-                    }}
-                    onClick={() => {
-                      void playUiSound('click')
-                    }}
-                    className={cn(
-                      'cursor-pointer font-mono text-xs text-neutral-500',
-                      'transition-colors duration-300 hover:text-amber-400',
-                      'focus-visible:text-amber-400 focus-visible:outline-none',
-                    )}
+                  <motion.div
+                    variants={fadeUp({
+                      reduceMotion: !useEntrance,
+                    })}
+                    className="mt-5 sm:mt-6"
                   >
-                    {link.hudLabel}
-                  </a>
-                </li>
-              ))}
-            </motion.ul>
-          </TextBackdrop>
+                    <DecryptText
+                      as="h1"
+                      id="hero-heading"
+                      text={heroContent.headline}
+                      tickMs={compact ? 20 : 26}
+                      delayMs={0}
+                      active={heroReady && useEntrance}
+                      className={cn(
+                        'font-display text-5xl font-bold tracking-[-0.03em] leading-[0.85] text-balance text-left lg:text-7xl',
+                        'bg-[linear-gradient(105deg,#ffffff_0%,#f5f4f0_22%,#c6a15b_52%,#f5f4f0_78%,#ffffff_100%)]',
+                        'bg-clip-text text-transparent',
+                        '[background-size:140%_100%]',
+                        HERO_TEXT_SHADOW,
+                      )}
+                    />
+                    <p
+                      className={cn(
+                        'my-3 border-l-2 border-amber-500/50 pl-3 text-left',
+                        'font-mono text-sm font-medium text-neutral-200 drop-shadow-sm',
+                        HERO_TEXT_SHADOW,
+                      )}
+                    >
+                      {heroContent.founderLine}
+                    </p>
+                  </motion.div>
 
-          {/* Right column — layout breath for the fixed WebGL canvas */}
+                  <motion.ul
+                    variants={staggerContainer({
+                      stagger: compact ? 0.04 : 0.05,
+                      delay: 0.02,
+                      reduceMotion: !useEntrance,
+                      compact,
+                    })}
+                    className="my-4 flex flex-wrap items-center justify-start gap-3"
+                  >
+                    {heroContent.roles.map((role, index) => (
+                      <motion.li
+                        key={role}
+                        variants={fadeUp({
+                          reduceMotion: !useEntrance,
+                          y: 10,
+                          duration: 0.45,
+                        })}
+                      >
+                        <span
+                          className={cn(
+                            'font-mono text-xs uppercase tracking-widest',
+                            HERO_TEXT_SHADOW,
+                            index === 0
+                              ? 'border-l-2 border-amber-400 bg-amber-400/10 px-3 py-1.5 font-semibold text-amber-300 [clip-path:polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,0_100%)]'
+                              : 'border-b border-neutral-700/80 px-2 py-1 text-neutral-200 transition-colors hover:border-amber-400/50 hover:text-amber-300',
+                          )}
+                        >
+                          {role}
+                        </span>
+                      </motion.li>
+                    ))}
+                  </motion.ul>
+                </motion.div>
+
+                <p
+                  className={cn(
+                    'mt-6 max-w-xl text-left text-pretty sm:mt-8',
+                    'text-sm font-normal leading-relaxed text-slate-200 sm:text-base',
+                    HERO_TEXT_SHADOW,
+                  )}
+                >
+                  <Typewriter
+                    text={heroContent.description}
+                    speed={TYPE_SPEED_MS}
+                    startDelay={typewriterStartMs}
+                    enabled={useEntrance}
+                    active={heroReady}
+                    className="text-left"
+                  />
+                </p>
+
+                <motion.div
+                  variants={fadeUp({
+                    reduceMotion: !useEntrance,
+                    delay: buttonsDelaySec,
+                  })}
+                  initial={useEntrance ? 'hidden' : false}
+                  animate={heroReady || !useEntrance ? 'visible' : 'hidden'}
+                  className="mt-8 flex w-full flex-row items-center gap-3"
+                >
+                  <MagneticLink
+                    to={heroContent.primaryCta.href}
+                    data-cursor="view"
+                    data-magnetic
+                    depthGlyph={<span className="text-[0.95em]">→</span>}
+                    containerClassName="min-w-0 flex-1 sm:flex-none"
+                    className={cn(
+                      ctaClass.primary,
+                      'w-full',
+                      lowPower ? 'og-glass-cta-fallback' : 'og-glass-cta',
+                    )}
+                    onClick={(event) => {
+                      event.preventDefault()
+                      navigate(heroContent.primaryCta.href)
+                      requestAnimationFrame(() => {
+                        navigateWithCameraWarp(
+                          sectionIdFromHref(heroContent.primaryCta.href),
+                        )
+                      })
+                    }}
+                  >
+                    {heroContent.primaryCta.label}
+                  </MagneticLink>
+
+                  <MagneticAnchor
+                    href={heroContent.secondaryCta.href}
+                    download={heroContent.secondaryCta.download}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-magnetic
+                    depthGlyph={<span className="text-[0.85em]">↓</span>}
+                    containerClassName="min-w-0 flex-1 sm:flex-none"
+                    className={cn(ctaClass.secondary, 'w-full')}
+                  >
+                    {heroContent.secondaryCta.label}
+                  </MagneticAnchor>
+                </motion.div>
+
+                <motion.ul
+                  variants={fadeUp({
+                    reduceMotion: !useEntrance,
+                    delay: socialDelaySec,
+                  })}
+                  initial={useEntrance ? 'hidden' : false}
+                  animate={heroReady || !useEntrance ? 'visible' : 'hidden'}
+                  className={cn(
+                    'mt-5 flex w-full items-center justify-start gap-2 overflow-x-auto pb-1',
+                    'font-mono text-xs',
+                    '[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+                  )}
+                >
+                  {socialLinks.map((link) => {
+                    const Icon = link.icon
+                    return (
+                      <li key={link.label} className="shrink-0">
+                        <a
+                          href={link.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          data-magnetic
+                          onPointerEnter={() => {
+                            void playUiSound('hover')
+                          }}
+                          onClick={() => {
+                            void playUiSound('click')
+                          }}
+                          className={cn(
+                            socialBadgeClassName,
+                            'border-neutral-800/80 px-3 py-1.5 text-xs font-mono whitespace-nowrap text-neutral-300',
+                            'hover:border-amber-400/50 hover:text-amber-300',
+                            HERO_TEXT_SHADOW,
+                          )}
+                        >
+                          <Icon className="size-3.5 shrink-0" />
+                          <span>{link.label}</span>
+                        </a>
+                      </li>
+                    )
+                  })}
+                </motion.ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Right — canvas breath / orb stage */}
           <div
-            className="pointer-events-none relative hidden min-h-[320px] lg:col-span-7 lg:block"
+            className="pointer-events-none relative hidden h-[500px] items-center justify-center lg:col-span-7 lg:flex lg:h-[650px]"
             aria-hidden
           />
         </div>
 
         <motion.div
-          className="absolute inset-x-0 bottom-4 z-20 px-4 sm:bottom-6 sm:px-6 lg:px-8"
+          className="absolute inset-x-0 bottom-4 z-20 px-6 sm:bottom-6"
           variants={fadeUp({
             reduceMotion: !useEntrance,
             delay: socialDelaySec + 0.08,
@@ -337,7 +370,7 @@ export function Hero() {
           initial={useEntrance ? 'hidden' : false}
           animate={heroReady || !useEntrance ? 'visible' : 'hidden'}
         >
-          <div className="mx-auto max-w-6xl">
+          <div className="mx-auto max-w-7xl">
             <HudStatusBar variant="hero" />
           </div>
         </motion.div>
