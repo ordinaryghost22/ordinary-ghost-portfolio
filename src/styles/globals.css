@@ -196,6 +196,7 @@
     color-scheme: dark;
     scroll-behavior: smooth;
     scroll-padding-top: 5rem;
+    overflow-x: clip;
   }
 
   section[id] {
@@ -214,8 +215,15 @@
   .og-selected-work {
     scrollbar-width: none;
     -ms-overflow-style: none;
-    scroll-padding-left: 1.5rem; /* px-6 */
-    scroll-padding-right: 1.5rem;
+    scroll-padding-left: 1.25rem; /* px-5 */
+    scroll-padding-right: 1.25rem;
+  }
+
+  @media (min-width: 640px) {
+    .og-selected-work {
+      scroll-padding-left: 1.5rem; /* sm:px-6 */
+      scroll-padding-right: 1.5rem;
+    }
   }
 
   @media (min-width: 1024px) {
@@ -254,11 +262,19 @@
     font-size: 1.125rem; /* body 18px */
     line-height: 1.6;
     letter-spacing: -0.011em;
+    overflow-x: clip;
+  }
+
+  @media (max-width: 639px) {
+    body {
+      font-size: 1rem; /* 16px — easier reading on narrow screens */
+    }
   }
 
   #root {
     min-height: 100dvh;
     background-color: var(--background);
+    overflow-x: clip;
   }
 
   h1,
@@ -746,6 +762,27 @@
       color-mix(in srgb, var(--hero-bg) 70%, transparent) 28%,
       transparent 52%
     );
+}
+
+/* Mobile: moon sits low-right — fade from top + bottom so copy stays clear */
+@media (max-width: 767px) {
+  .og-hero-moon-veil {
+    background:
+      linear-gradient(
+        180deg,
+        var(--hero-bg) 0%,
+        color-mix(in srgb, var(--hero-bg) 75%, transparent) 38%,
+        color-mix(in srgb, var(--hero-bg) 25%, transparent) 58%,
+        transparent 72%
+      ),
+      radial-gradient(
+        ellipse 95% 70% at 90% 100%,
+        transparent 0%,
+        transparent 18%,
+        color-mix(in srgb, var(--hero-bg) 55%, transparent) 48%,
+        var(--hero-bg) 78%
+      );
+  }
 }
 
 @keyframes og-hero-scroll-nudge {

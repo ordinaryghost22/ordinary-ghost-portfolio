@@ -68,12 +68,14 @@ function CapabilityRow({ capability }: { capability: Capability }) {
           className={cn(
             'flex shrink-0 items-center gap-2',
             META_CLASS,
-            'tracking-wide opacity-0 transition-all duration-200',
-            'group-hover:translate-x-1 group-hover:opacity-100 group-focus-visible:translate-x-1 group-focus-visible:opacity-100',
+            'tracking-wide opacity-100 transition-all duration-200 md:opacity-0',
+            'md:group-hover:translate-x-1 md:group-hover:opacity-100 md:group-focus-visible:translate-x-1 md:group-focus-visible:opacity-100',
             active && 'translate-x-1 opacity-100',
           )}
         >
-          {shipTag ? <span className="max-w-[14ch] truncate">{shipTag}</span> : null}
+          {shipTag ? (
+            <span className="hidden max-w-[14ch] truncate sm:inline">{shipTag}</span>
+          ) : null}
           <span aria-hidden className="text-zinc-400">
             →
           </span>
@@ -153,7 +155,7 @@ export function Skills() {
                 'mt-5 max-w-[40ch] text-[17px] sm:text-[18px]',
               )}
             >
-              Across systems, product, and infrastructure. Hover a line to see
+              Across systems, product, and infrastructure. Select a line to see
               where it ships.
             </RevealText>
           </div>

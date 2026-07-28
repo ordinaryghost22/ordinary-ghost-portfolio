@@ -1,6 +1,6 @@
 /** Unified editorial page grid — shared by every content section. */
 export const PAGE_SHELL =
-  'mx-auto grid w-full max-w-7xl grid-cols-1 gap-8 px-6 md:grid-cols-12'
+  'mx-auto grid w-full max-w-7xl grid-cols-1 gap-8 px-5 sm:px-6 md:grid-cols-12'
 
 /** Left rail: section identifiers (cols 1–4) */
 export const COL_LABEL = 'md:col-span-4 md:col-start-1'

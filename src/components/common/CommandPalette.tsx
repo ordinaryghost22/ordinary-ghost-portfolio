@@ -27,7 +27,6 @@ import {
 } from '@/context/scene-controls-context'
 import {
   CONTACT_EMAIL,
-  RESUME_DOWNLOAD_NAME,
   RESUME_URL,
 } from '@/data/contact'
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
@@ -75,14 +74,7 @@ async function copyEmail() {
 }
 
 function downloadResume() {
-  const link = document.createElement('a')
-  link.href = RESUME_URL
-  link.download = RESUME_DOWNLOAD_NAME
-  link.target = '_blank'
-  link.rel = 'noopener noreferrer'
-  document.body.appendChild(link)
-  link.click()
-  link.remove()
+  window.open(RESUME_URL, '_blank', 'noopener,noreferrer')
 }
 
 export function CommandPalette() {

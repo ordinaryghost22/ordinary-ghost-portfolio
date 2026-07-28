@@ -1,6 +1,6 @@
 /**
- * Web Audio UI ticks + optional ambient sci-fi drone.
- * Ambient starts only after a user gesture (autoplay-safe).
+ * Web Audio UI ticks (hover / click / nav).
+ * Ambient machine drone removed — ticks only.
  */
 
 export type UiSoundId =
@@ -29,13 +29,13 @@ type AmbientNodes = {
 
 let engine: UiAudioEngine | null = null
 let ambient: AmbientNodes | null = null
-/** Master mute — UI ticks + ambient */
+/** Master mute — UI ticks */
 let muted = false
-/** Ambient layer preference (still respects muted) */
-let ambientDesired = true
+/** Ambient drone permanently off */
+let ambientDesired = false
 let lastHoverAt = 0
 
-const AMBIENT_VOL = 0.15
+const AMBIENT_VOL = 0
 
 async function ensureEngine() {
   if (!engine) {
@@ -140,20 +140,20 @@ export function getUiSoundsMuted() {
   return muted
 }
 
-/** Prefer ambient on/off while unmuted (navbar SOUND toggle). */
-export function setAmbientEnabled(next: boolean) {
-  ambientDesired = next
+/** Ambient drone is disabled — kept for API compatibility. */
+export function setAmbientEnabled(_next: boolean) {
+  ambientDesired = false
   void syncAmbient().catch(() => {})
 }
 
 export function getAmbientEnabled() {
-  return ambientDesired && !muted
+  return false
 }
 
-/** Combined sound preference for the HUD toggle. */
+/** Mute / unmute UI ticks (ambient stays off). */
 export function setSoundEnabled(next: boolean) {
   muted = !next
-  ambientDesired = next
+  ambientDesired = false
   void syncAmbient().catch(() => {})
 }
 
@@ -235,10 +235,6 @@ export async function playUiSound(id: UiSoundId) {
   if (muted) return
   try {
     const e = await ensureEngine()
-    // First interaction can unlock ambient if desired
-    if (ambientDesired && !ambient) {
-      void syncAmbient()
-    }
     switch (id) {
       case 'hover': {
         const now = performance.now()

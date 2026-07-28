@@ -142,6 +142,7 @@ function SoftPrimaryLink({
 
   const onMove = (event: MouseEvent<HTMLDivElement>) => {
     if (reduceMotion || !btnRef.current) return
+    if (typeof window !== 'undefined' && window.innerWidth < 768) return
     const rect = btnRef.current.getBoundingClientRect()
     const cx = rect.left + rect.width / 2
     const cy = rect.top + rect.height / 2
@@ -172,8 +173,11 @@ function SoftPrimaryLink({
 
   return (
     <div
-      className="relative inline-flex"
-      style={reduceMotion ? undefined : { padding: 56, margin: -56 }}
+      className={cn(
+        'relative inline-flex',
+        /* Magnetic hit pad is desktop-only — negative margin overflows on phones */
+        !reduceMotion && 'md:p-14 md:-m-14',
+      )}
       onMouseMove={onMove}
       onMouseLeave={onLeave}
     >
@@ -279,7 +283,7 @@ export function Hero() {
       aria-labelledby="hero-heading"
       className={cn(
         'og-hero relative overflow-hidden',
-        'min-h-0 md:min-h-[calc(100dvh-5rem)]',
+        'min-h-[calc(100dvh-5rem)]',
       )}
     >
       {/* Stars — behind moon */}
@@ -323,14 +327,14 @@ export function Hero() {
       <motion.div
         className={cn(
           'relative z-10 flex w-full flex-col',
-          'md:min-h-[calc(100dvh-5rem)]',
+          'min-h-[calc(100dvh-5rem)]',
         )}
         style={reduceMotion ? undefined : { x: typeX, y: typeY }}
       >
         <div
           className={cn(
             'mx-auto flex w-full max-w-7xl flex-1 flex-col justify-start',
-            'px-6 pt-16 pb-32',
+            'px-5 pt-12 pb-28 sm:px-6 sm:pt-16 sm:pb-32',
             'md:pt-20',
             'lg:pt-[min(12vh,6rem)] lg:pb-36',
           )}
@@ -341,7 +345,7 @@ export function Hero() {
               active={contentActive}
               reduceMotion={reduceMotion}
               y={18}
-              className="og-hero-mono text-[color:var(--hero-text-dim)]"
+              className="og-hero-mono max-w-[28ch] text-[color:var(--hero-text-dim)] sm:max-w-none"
             >
               {heroContent.eyebrow}
             </FadeUp>
@@ -349,8 +353,8 @@ export function Hero() {
             <h1
               id="hero-heading"
               className={cn(
-                'og-hero-display mt-10 text-[color:var(--hero-text)]',
-                'text-[clamp(3.25rem,8.6vw,6.5rem)]',
+                'og-hero-display mt-8 text-[color:var(--hero-text)] sm:mt-10',
+                'text-[clamp(2.75rem,11vw,6.5rem)] md:text-[clamp(3.25rem,8.6vw,6.5rem)]',
               )}
             >
               <FadeUp
@@ -396,8 +400,8 @@ export function Hero() {
               reduceMotion={reduceMotion}
               y={20}
               className={cn(
-                'mt-12 max-w-[40ch]',
-                'text-[16px] leading-[1.7] tracking-[-0.011em] sm:text-[17px]',
+                'mt-8 max-w-[40ch] sm:mt-12',
+                'text-[15px] leading-[1.7] tracking-[-0.011em] sm:text-[17px]',
                 'text-zinc-400',
               )}
             >
@@ -413,8 +417,8 @@ export function Hero() {
               reduceMotion={reduceMotion}
               y={18}
               className={cn(
-                'mt-12 flex flex-col items-start gap-5',
-                'sm:flex-row sm:items-center sm:gap-8',
+                'mt-8 flex flex-col items-start gap-4',
+                'sm:mt-12 sm:flex-row sm:items-center sm:gap-8',
               )}
             >
               <SoftPrimaryLink
@@ -434,7 +438,6 @@ export function Hero() {
 
               <a
                 href={heroContent.secondaryCta.href}
-                download={heroContent.secondaryCta.download}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={cn(
@@ -449,7 +452,7 @@ export function Hero() {
                   aria-hidden
                   className="transition-transform duration-200 group-hover:translate-x-0.5"
                 >
-                  ↓
+                  ↗
                 </span>
               </a>
             </FadeUp>
@@ -461,7 +464,7 @@ export function Hero() {
           active={contentActive}
           reduceMotion={reduceMotion}
           y={12}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 pb-6 sm:bottom-10"
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 pb-4 sm:bottom-10 sm:pb-6"
         >
           <button
             type="button"

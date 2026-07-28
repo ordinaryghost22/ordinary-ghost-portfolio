@@ -1,4 +1,4 @@
-import { RESUME_DOWNLOAD_NAME, RESUME_URL } from '@/data/contact'
+import { RESUME_URL } from '@/data/contact'
 
 export const heroContent = {
   eyebrow: 'Shayan Ahmed — Available for work',
@@ -20,6 +20,5 @@ export const heroContent = {
   secondaryCta: {
     label: 'Resume',
     href: RESUME_URL,
-    download: RESUME_DOWNLOAD_NAME,
   },
 } as const

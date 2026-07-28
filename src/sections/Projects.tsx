@@ -177,7 +177,7 @@ export function Projects() {
             <RevealText
               independent={false}
               as="p"
-              className={cn(BODY_CLASS, 'mt-5 max-w-[34ch] text-[18px]')}
+              className={cn(BODY_CLASS, 'mt-5 max-w-[34ch] text-[16px] sm:text-[18px]')}
             >
               Three covers. Open any one to read how it was thought through.
             </RevealText>
@@ -234,7 +234,7 @@ export function Projects() {
           tabIndex={0}
           className={cn(
             'og-selected-work w-full pb-24 lg:pb-32',
-            'flex flex-col gap-16 px-6',
+            'flex flex-col gap-16 px-5 sm:px-6',
             'md:flex-row md:gap-10 md:overflow-x-auto md:snap-x md:snap-mandatory md:scroll-smooth',
             'md:outline-none',
           )}

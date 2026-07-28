@@ -100,11 +100,12 @@ export function MoonFlat({
           oversized
             ? 'h-[min(175vw,2100px)] w-[min(175vw,2100px)] translate-x-[30%] translate-y-[38%]'
             : cn(
-                'h-[min(125vw,960px)] w-[min(125vw,960px)]',
+                /* Phones: smaller, tucked into the corner so copy stays readable */
+                'h-[min(88vw,380px)] w-[min(88vw,380px)]',
+                'translate-x-[26%] translate-y-[48%]',
                 'sm:h-[min(100vw,1100px)] sm:w-[min(100vw,1100px)]',
-                'lg:h-[min(82vw,1180px)] lg:w-[min(82vw,1180px)]',
-                'translate-x-[22%] translate-y-[32%]',
                 'sm:translate-x-[18%] sm:translate-y-[30%]',
+                'lg:h-[min(82vw,1180px)] lg:w-[min(82vw,1180px)]',
                 'lg:translate-x-[16%] lg:translate-y-[34%]',
               ),
         )}

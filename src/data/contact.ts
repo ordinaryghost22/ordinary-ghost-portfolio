@@ -14,10 +14,10 @@ export const CONTACT_PHONE = '+92 332 816787'
 export const CONTACT_TEL_HREF = 'tel:+92332816787'
 export const CONTACT_WHATSAPP_HREF = 'https://wa.me/92332816787'
 
-export const CONTACT_LOCATION = 'Karachi, Pakistan'
+export const CONTACT_LOCATION = 'Lahore, Pakistan'
 
-export const RESUME_URL = '/resume.pdf'
-export const RESUME_DOWNLOAD_NAME = 'Shayan_Ahmed_CV.pdf'
+export const RESUME_URL = '/resume.html'
+export const RESUME_DOWNLOAD_NAME = 'Shayan_Ahmed_CV.html'
 
 export const contactContent = {
   eyebrow: 'Contact',

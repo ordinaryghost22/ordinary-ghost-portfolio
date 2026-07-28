@@ -86,7 +86,7 @@ export function Contact() {
           <RevealText
             independent={false}
             as="p"
-            className={cn(BODY_CLASS, 'mt-5 max-w-[38ch] text-[18px]')}
+            className={cn(BODY_CLASS, 'mt-5 max-w-[38ch] text-[16px] sm:text-[18px]')}
           >
             <span className="block">{contactContent.supporting[0]}</span>
             <span className="mt-1 block">{contactContent.supporting[1]}</span>
@@ -107,7 +107,7 @@ export function Contact() {
               className={cn(
                 TEXT_LINK_CLASS,
                 TEXT_LINK_UNDERLINE,
-                'text-[15px] sm:text-base',
+                'break-all text-[15px] sm:text-base',
               )}
             >
               {CONTACT_EMAIL}
@@ -121,7 +121,7 @@ export function Contact() {
             reduceMotion,
             duration: DURATION.section,
           })}
-          className="col-span-full mt-16 grid w-full grid-cols-2 gap-8 border-t border-zinc-800/80 pt-12 md:grid-cols-4"
+          className="col-span-full mt-16 grid w-full grid-cols-1 gap-8 border-t border-zinc-800/80 pt-12 sm:grid-cols-2 md:grid-cols-4"
         >
           <MetaBlock label={contactContent.details.email}>
             <a
@@ -129,7 +129,7 @@ export function Contact() {
               onPointerEnter={() => {
                 void playUiSound('hover')
               }}
-              className={valueClassName}
+              className={cn(valueClassName, 'break-all')}
             >
               {CONTACT_EMAIL}
             </a>

@@ -197,7 +197,7 @@ export function Navbar() {
       <motion.nav
         className={cn(
           'relative mx-auto flex h-20 w-full max-w-6xl items-center justify-between',
-          'px-8 md:px-16 lg:px-24',
+          'px-5 sm:px-8 md:px-16 lg:px-24',
           'font-[family-name:Inter,ui-sans-serif,system-ui,sans-serif]',
         )}
         aria-label="Primary"

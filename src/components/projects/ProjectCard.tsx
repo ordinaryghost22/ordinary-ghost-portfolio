@@ -171,7 +171,7 @@ export function ProjectCard({
         <p className="mt-3 max-w-[36ch] text-[14px] leading-[1.6] tracking-[-0.011em] text-zinc-400">
           {description}
         </p>
-        <p className="mt-5 text-[12px] tracking-[0.04em] text-zinc-500">
+        <p className="mt-5 break-words text-[12px] tracking-[0.04em] text-zinc-500">
           {tags.join(' · ')}
         </p>
         <span

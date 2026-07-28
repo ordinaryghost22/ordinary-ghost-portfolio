@@ -60,7 +60,7 @@ export function CaseStudyPage() {
 
           <p className={cn(LABEL_CLASS, 'mt-12')}>Case study</p>
 
-          <h1 className="og-hero-display mt-5 text-[clamp(2.5rem,6vw,4.25rem)] text-zinc-50">
+          <h1 className="og-hero-display mt-5 text-[clamp(2.25rem,8vw,4.25rem)] text-zinc-50">
             {project.title}
           </h1>
 
@@ -68,7 +68,7 @@ export function CaseStudyPage() {
             {project.year} · {project.tags.join(' · ')}
           </p>
 
-          <p className={cn(BODY_CLASS, 'mt-8 max-w-[42ch] text-[18px]')}>
+          <p className={cn(BODY_CLASS, 'mt-8 max-w-[42ch] text-[16px] sm:text-[18px]')}>
             {project.summary}
           </p>
 
@@ -82,34 +82,34 @@ export function CaseStudyPage() {
           </div>
 
           <section className="mt-16 border-t border-zinc-900 pt-12">
-            <h2 className="og-hero-display text-[28px] text-zinc-50">Problem</h2>
-            <p className={cn(BODY_CLASS, 'mt-4 max-w-[52ch] text-[16px]')}>
+            <h2 className="og-hero-display text-[24px] text-zinc-50 sm:text-[28px]">Problem</h2>
+            <p className={cn(BODY_CLASS, 'mt-4 max-w-[52ch] text-[15px] sm:text-[16px]')}>
               {project.problem}
             </p>
           </section>
 
           <section className="mt-14">
-            <h2 className="og-hero-display text-[28px] text-zinc-50">Solution</h2>
-            <p className={cn(BODY_CLASS, 'mt-4 max-w-[52ch] text-[16px]')}>
+            <h2 className="og-hero-display text-[24px] text-zinc-50 sm:text-[28px]">Solution</h2>
+            <p className={cn(BODY_CLASS, 'mt-4 max-w-[52ch] text-[15px] sm:text-[16px]')}>
               {project.solution.overview}
             </p>
-            <p className={cn(BODY_CLASS, 'mt-4 max-w-[52ch] text-[16px]')}>
+            <p className={cn(BODY_CLASS, 'mt-4 max-w-[52ch] text-[15px] sm:text-[16px]')}>
               {project.solution.architecture}
             </p>
-            <p className={cn(BODY_CLASS, 'mt-4 max-w-[52ch] text-[16px]')}>
+            <p className={cn(BODY_CLASS, 'mt-4 max-w-[52ch] text-[15px] sm:text-[16px]')}>
               {project.solution.ux}
             </p>
           </section>
 
           <section className="mt-14">
-            <h2 className="og-hero-display text-[28px] text-zinc-50">Outcome</h2>
-            <p className={cn(BODY_CLASS, 'mt-4 max-w-[52ch] text-[16px]')}>
+            <h2 className="og-hero-display text-[24px] text-zinc-50 sm:text-[28px]">Outcome</h2>
+            <p className={cn(BODY_CLASS, 'mt-4 max-w-[52ch] text-[15px] sm:text-[16px]')}>
               {project.outcome}
             </p>
           </section>
 
           <section className="mt-14">
-            <h2 className="og-hero-display text-[28px] text-zinc-50">Stack</h2>
+            <h2 className="og-hero-display text-[24px] text-zinc-50 sm:text-[28px]">Stack</h2>
             <p className={cn(META_CLASS, 'mt-4 uppercase')}>
               {project.architecture.join(' · ')}
             </p>
