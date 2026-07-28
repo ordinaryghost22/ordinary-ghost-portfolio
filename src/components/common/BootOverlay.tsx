@@ -91,27 +91,9 @@ function ScramblePercent({ value }: { value: number }) {
   )
 
   return (
-    <span className="relative inline-flex font-mono text-5xl font-medium tracking-[-0.04em] tabular-nums sm:text-6xl md:text-7xl">
-      {/* Centered radial glow — transparent fill so only the even halo shows */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 select-none text-transparent"
-        style={{ textShadow: '0px 0px 25px rgba(245, 158, 11, 0.75)' }}
-      >
-        {display}
-        <span className="text-2xl sm:text-3xl">%</span>
-      </span>
-      <span
-        className={cn(
-          'relative bg-gradient-to-b from-amber-100 via-amber-400 to-amber-700',
-          'bg-clip-text text-transparent',
-        )}
-      >
-        {display}
-        <span className="bg-gradient-to-b from-amber-200/90 via-amber-400 to-amber-600 bg-clip-text text-2xl text-transparent sm:text-3xl">
-          %
-        </span>
-      </span>
+    <span className="relative inline-flex text-5xl font-medium tracking-[-0.04em] tabular-nums text-[#FAFAFA] sm:text-6xl md:text-7xl">
+      {display}
+      <span className="text-2xl text-[#A1A1AA] sm:text-3xl">%</span>
     </span>
   )
 }
@@ -287,13 +269,12 @@ export function BootOverlay() {
           <motion.div
             className={cn(
               'og-boot-hud relative z-[1] mx-4 flex w-full max-w-md flex-col items-center',
-              'rounded-2xl border border-amber-500/30 bg-black/40 p-5 sm:p-8',
-              'shadow-[0_0_50px_rgba(245,158,11,0.15)] backdrop-blur-xl',
+              'rounded-[20px] p-8',
             )}
             initial={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
             animate={
               exiting
-                ? { opacity: 0, scale: 1.05, filter: 'blur(20px)' }
+                ? { opacity: 0, scale: 1.02, filter: 'blur(12px)' }
                 : { opacity: 1, scale: 1, filter: 'blur(0px)' }
             }
             transition={{
@@ -301,17 +282,17 @@ export function BootOverlay() {
               ease: [0.16, 1, 0.3, 1],
             }}
           >
-            <p className="relative z-[1] text-center font-mono text-[9px] tracking-[0.22em] text-amber-400/70 uppercase sm:text-[10px] sm:tracking-[0.28em]">
+            <p className="relative z-[1] text-center text-[12px] font-medium tracking-[0.16em] text-[#6B7280] uppercase">
               Ordinary Ghost // Init
             </p>
 
-            <div className="relative z-[1] mt-6 sm:mt-8">
+            <div className="relative z-[1] mt-8">
               <ScramblePercent value={percent} />
             </div>
 
-            <div className="relative z-[1] mt-6 h-px w-full max-w-[220px] overflow-hidden bg-white/10 sm:mt-8">
+            <div className="relative z-[1] mt-8 h-px w-full max-w-[220px] overflow-hidden bg-[rgba(255,255,255,0.08)]">
               <motion.div
-                className="h-full bg-gradient-to-r from-amber-500/40 via-amber-300 to-amber-500/40"
+                className="h-full bg-[#FAFAFA]"
                 initial={false}
                 animate={{ width: `${clampPercent(percent)}%` }}
                 transition={{ duration: 0.08, ease: 'linear' }}
@@ -320,19 +301,14 @@ export function BootOverlay() {
 
             <p
               className={cn(
-                'relative z-[1] mt-4 px-1 text-center font-mono text-[10px] tracking-[0.16em] uppercase sm:mt-5 sm:text-[11px] sm:tracking-[0.2em]',
-                'text-amber-200/80',
-                'animate-pulse',
+                'relative z-[1] mt-4 px-1 text-center text-[14px] font-medium tracking-[-0.01em]',
+                'text-[#A1A1AA]',
               )}
-              style={{
-                textShadow:
-                  '0 0 18px rgba(245, 158, 11, 0.45), 0 0 40px rgba(245, 158, 11, 0.2)',
-              }}
             >
               {STATUS_LINES[statusIdx]}
             </p>
 
-            <div className="relative z-[1] mt-6 flex w-full justify-between gap-2 font-mono text-[8px] tracking-[0.12em] text-white/25 uppercase sm:mt-10 sm:text-[9px] sm:tracking-[0.16em]">
+            <div className="relative z-[1] mt-8 flex w-full justify-between gap-2 text-[12px] tracking-[0.08em] text-[#6B7280] uppercase">
               <span>MEM OK</span>
               <span>GPU LINK</span>
               <span>Z → 5</span>

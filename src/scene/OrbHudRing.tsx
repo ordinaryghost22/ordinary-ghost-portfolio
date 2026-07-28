@@ -25,7 +25,7 @@ export function OrbHudRing({ radius = 2.05, visible = true }: OrbHudRingProps) {
   const material = useMemo(
     () =>
       new THREE.LineBasicMaterial({
-        color: '#C6A15B',
+        color: '#E4E4E7',
         transparent: true,
         opacity: 0.28,
         depthWrite: false,

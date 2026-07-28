@@ -1,19 +1,24 @@
 import { RESUME_DOWNLOAD_NAME, RESUME_URL } from '@/data/contact'
 
 export const heroContent = {
-  badge: 'AVAILABLE FOR HIRE',
-  headline: 'Ordinary Ghost',
-  founderLine:
-    'Engineered & Led by Shayan Ahmed — Founder & Lead Architect',
-  roles: ['AI SYSTEMS', 'FULL-STACK', 'SAAS ARCHITECTURE'],
-  description:
-    'We engineer autonomous AI receptionists, custom RAG search engines, and production full-stack platforms for fast-growing businesses.',
+  eyebrow: 'Shayan Ahmed — Available for work',
+  headline: {
+    line1: 'Built slowly.',
+    line2: 'Meant',
+    line3Before: 'to ',
+    line3Italic: 'last',
+    line3After: '.',
+  },
+  supporting: [
+    'I build software for businesses that cannot afford quiet failures.',
+    'Booking, learning, and operations systems — designed and shipped end to end.',
+  ],
   primaryCta: {
-    label: 'View Case Studies',
-    href: '/#projects',
+    label: 'See the work',
+    href: '/#work',
   },
   secondaryCta: {
-    label: 'Read Resume',
+    label: 'Resume',
     href: RESUME_URL,
     download: RESUME_DOWNLOAD_NAME,
   },

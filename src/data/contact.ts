@@ -14,8 +14,33 @@ export const CONTACT_PHONE = '+92 332 816787'
 export const CONTACT_TEL_HREF = 'tel:+92332816787'
 export const CONTACT_WHATSAPP_HREF = 'https://wa.me/92332816787'
 
+export const CONTACT_LOCATION = 'Karachi, Pakistan'
+
 export const RESUME_URL = '/resume.pdf'
 export const RESUME_DOWNLOAD_NAME = 'Shayan_Ahmed_CV.pdf'
+
+export const contactContent = {
+  eyebrow: 'Contact',
+  heading: 'Get in touch.',
+  supporting: [
+    'Available for freelance work and collaborations',
+    'on products that need to hold in production.',
+  ],
+  primaryCta: {
+    label: 'Write to me',
+  },
+  details: {
+    email: 'Email',
+    linkedin: 'LinkedIn',
+    github: 'GitHub',
+    location: 'Location',
+  },
+} as const
+
+export const footerContent = {
+  brand: 'Ordinary Ghost',
+  credit: 'Built with care.',
+} as const
 
 type BrandIcon = ComponentType<SVGProps<SVGSVGElement> & { className?: string }>
 
@@ -53,4 +78,4 @@ export const socialLinks: SocialLink[] = [
 ]
 
 export const socialBadgeClassName =
-  'flex items-center gap-2 rounded-lg border border-neutral-800 bg-neutral-900/60 px-4 py-2 text-neutral-300 transition-all duration-300 hover:border-amber-400/50 hover:bg-amber-400/10 hover:text-amber-400 hover:shadow-[0_0_15px_rgba(245,158,11,0.2)]'
+  'flex items-center gap-2 rounded-[14px] border border-[rgba(255,255,255,0.08)] bg-[#111111] px-4 py-2 text-[#A1A1AA] transition-[border-color,background-color,color] duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-[rgba(255,255,255,0.16)] hover:bg-[#171717] hover:text-[#FAFAFA]'

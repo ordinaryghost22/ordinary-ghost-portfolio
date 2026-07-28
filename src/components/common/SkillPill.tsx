@@ -1,10 +1,8 @@
 import {
   motion,
-  useMotionTemplate,
   useMotionValue,
   useReducedMotion,
   useSpring,
-  useTransform,
 } from 'framer-motion'
 import { useEffect, useRef } from 'react'
 
@@ -18,7 +16,7 @@ type SkillPillProps = {
 }
 
 /**
- * Glassmorphism skill tag — magnetic suction, 3D tilt, cross-highlights projects.
+ * Skill tag — quiet surface, consistent radius, no glow.
  */
 export function SkillPill({ skill, reduceMotion: reduceProp }: SkillPillProps) {
   const reduceMotionHook = useReducedMotion()
@@ -29,22 +27,14 @@ export function SkillPill({ skill, reduceMotion: reduceProp }: SkillPillProps) {
   const nodeRef = useRef<HTMLButtonElement>(null)
   const x = useMotionValue(0)
   const y = useMotionValue(0)
-  const rotateX = useMotionValue(0)
-  const rotateY = useMotionValue(0)
   const scaleMv = useMotionValue(1)
 
   const springX = useSpring(x, springSoft)
   const springY = useSpring(y, springSoft)
-  const springRX = useSpring(rotateX, springSoft)
-  const springRY = useSpring(rotateY, springSoft)
   const springScale = useSpring(scaleMv, springSoft)
 
-  const glareX = useTransform(springRY, [-10, 10], [20, 80])
-  const glareY = useTransform(springRX, [-10, 10], [70, 30])
-  const glareBg = useMotionTemplate`radial-gradient(circle at ${glareX}% ${glareY}%, rgb(255 255 255 / 0.22), transparent 55%)`
-
   useEffect(() => {
-    scaleMv.set(active ? 1.05 : 1)
+    scaleMv.set(active ? 1.02 : 1)
   }, [active, scaleMv])
 
   return (
@@ -55,13 +45,10 @@ export function SkillPill({ skill, reduceMotion: reduceProp }: SkillPillProps) {
           : {
               x: springX,
               y: springY,
-              rotateX: springRX,
-              rotateY: springRY,
               scale: springScale,
-              transformPerspective: 600,
             }
       }
-      className="inline-flex [transform-style:preserve-3d]"
+      className="inline-flex"
     >
       <button
         type="button"
@@ -73,8 +60,6 @@ export function SkillPill({ skill, reduceMotion: reduceProp }: SkillPillProps) {
           setHighlightedSkill(null)
           x.set(0)
           y.set(0)
-          rotateX.set(0)
-          rotateY.set(0)
         }}
         onFocus={() => setHighlightedSkill(skill)}
         onBlur={() => setHighlightedSkill(null)}
@@ -83,30 +68,20 @@ export function SkillPill({ skill, reduceMotion: reduceProp }: SkillPillProps) {
           const rect = nodeRef.current.getBoundingClientRect()
           const px = (event.clientX - rect.left) / rect.width - 0.5
           const py = (event.clientY - rect.top) / rect.height - 0.5
-          x.set(px * 10)
-          y.set(py * 10)
-          rotateY.set(px * 14)
-          rotateX.set(-py * 12)
+          x.set(px * 6)
+          y.set(py * 6)
         }}
         className={cn(
-          'og-liquid-glass relative overflow-visible rounded-full border border-transparent px-3.5 py-1.5',
-          'font-mono text-[11px] tracking-[0.08em] text-foreground/85 uppercase',
-          'transition-[border-color,color,box-shadow] duration-250',
-          'hover:border-amber-400/60 hover:text-foreground',
-          'hover:shadow-[0_0_10px_rgba(245,158,11,0.3)]',
+          'relative overflow-hidden rounded-[14px] border border-[rgba(255,255,255,0.08)]',
+          'bg-[#111111] px-4 py-2',
+          'text-[14px] font-medium tracking-[-0.01em] text-[#A1A1AA]',
+          'transition-[border-color,color,background-color] duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)]',
+          'hover:border-[rgba(255,255,255,0.16)] hover:bg-[#171717] hover:text-[#FAFAFA]',
           'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
           active &&
-            'border-amber-400/60 text-primary shadow-[0_0_10px_rgba(245,158,11,0.3)]',
+            'border-[rgba(255,255,255,0.16)] bg-[#171717] text-[#FAFAFA]',
         )}
       >
-        <motion.span
-          aria-hidden
-          className={cn(
-            'pointer-events-none absolute inset-0 overflow-hidden rounded-full',
-            reduceMotion ? 'opacity-0' : 'opacity-40',
-          )}
-          style={{ background: glareBg }}
-        />
         <span className="relative z-[1] whitespace-nowrap">{skill}</span>
       </button>
     </motion.div>

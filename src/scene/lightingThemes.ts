@@ -10,57 +10,58 @@ export type LightingPreset = {
   orbitEnabled: boolean
 }
 
+/** Monochrome night-OS lighting — silver key, no gold */
 export const LIGHTING_PRESETS: Record<LightingTheme, LightingPreset> = {
   void: {
-    background: '#09090b',
+    background: '#0A0B0E',
     fogNear: 6.2,
     fogFar: 16,
-    ambient: { intensity: 0.22, color: '#f5f4f0' },
+    ambient: { intensity: 0.22, color: '#FAFAFA' },
     fill: {
-      intensity: 0.18,
-      color: '#8f8d86',
+      intensity: 0.16,
+      color: '#A1A1AA',
       position: [-2.6, -1.0, 2.2],
     },
-    key: { intensity: 0.58, color: '#c6a15b' },
+    key: { intensity: 0.52, color: '#E4E4E7' },
     orbitEnabled: true,
   },
   ember: {
-    background: '#0a0705',
+    background: '#0A0B0E',
     fogNear: 5.5,
     fogFar: 14.5,
-    ambient: { intensity: 0.16, color: '#f0e6d8' },
+    ambient: { intensity: 0.18, color: '#F4F4F5' },
     fill: {
-      intensity: 0.22,
-      color: '#a8784a',
+      intensity: 0.2,
+      color: '#A1A1AA',
       position: [-2.2, -0.6, 2.0],
     },
-    key: { intensity: 0.72, color: '#e0a050' },
+    key: { intensity: 0.62, color: '#D4D4D8' },
     orbitEnabled: true,
   },
   fog: {
-    background: '#08090a',
+    background: '#0A0B0E',
     fogNear: 5.8,
     fogFar: 15,
-    ambient: { intensity: 0.3, color: '#d8dce0' },
+    ambient: { intensity: 0.28, color: '#E4E4E7' },
     fill: {
-      intensity: 0.28,
-      color: '#9aa3ad',
+      intensity: 0.24,
+      color: '#A1A1AA',
       position: [-2.4, -0.8, 2.4],
     },
-    key: { intensity: 0.48, color: '#c8d0d8' },
+    key: { intensity: 0.44, color: '#FAFAFA' },
     orbitEnabled: true,
   },
   studio: {
-    background: '#0c0c0b',
+    background: '#0A0B0E',
     fogNear: 7.5,
     fogFar: 18,
-    ambient: { intensity: 0.42, color: '#f5f4f0' },
+    ambient: { intensity: 0.4, color: '#FAFAFA' },
     fill: {
-      intensity: 0.35,
-      color: '#b8b5ae',
+      intensity: 0.32,
+      color: '#A1A1AA',
       position: [-2.8, 0.4, 2.6],
     },
-    key: { intensity: 0.4, color: '#c6a15b' },
+    key: { intensity: 0.38, color: '#E4E4E7' },
     orbitEnabled: false,
   },
 }

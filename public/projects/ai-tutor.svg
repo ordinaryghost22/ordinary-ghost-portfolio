@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" fill="none">
+  <rect width="1440" height="900" fill="#0A0A0A"/>
+  <!-- Sidebar -->
+  <rect x="0" y="0" width="380" height="900" fill="#0C0C0C"/>
+  <rect x="380" y="0" width="1" height="900" fill="#FFFFFF" fill-opacity="0.08"/>
+  <text x="36" y="48" fill="#FAFAFA" font-family="system-ui,sans-serif" font-size="20" font-weight="500">Class 10 - Physics</text>
+  <text x="36" y="74" fill="#6B7280" font-family="system-ui,sans-serif" font-size="13">Textbook index</text>
+  <rect x="24" y="108" width="332" height="52" rx="12" fill="#FFFFFF" fill-opacity="0.06"/>
+  <text x="44" y="140" fill="#FAFAFA" font-family="system-ui,sans-serif" font-size="15">Ch 1 - Motion</text>
+  <rect x="24" y="172" width="332" height="52" rx="12" fill="#171717"/>
+  <text x="44" y="204" fill="#A1A1AA" font-family="system-ui,sans-serif" font-size="15">Ch 2 - Force</text>
+  <rect x="24" y="236" width="332" height="52" rx="12" fill="#171717"/>
+  <text x="44" y="268" fill="#A1A1AA" font-family="system-ui,sans-serif" font-size="15">Ch 3 - Work &amp; Energy</text>
+  <rect x="24" y="300" width="332" height="52" rx="12" fill="#171717"/>
+  <text x="44" y="332" fill="#A1A1AA" font-family="system-ui,sans-serif" font-size="15">Ch 4 - Waves</text>
+  <rect x="24" y="364" width="332" height="52" rx="12" fill="#171717"/>
+  <text x="44" y="396" fill="#A1A1AA" font-family="system-ui,sans-serif" font-size="15">Ch 5 - Sound</text>
+  <rect x="24" y="428" width="332" height="52" rx="12" fill="#171717"/>
+  <text x="44" y="460" fill="#A1A1AA" font-family="system-ui,sans-serif" font-size="15">Ch 6 - Light</text>
+  <rect x="24" y="800" width="332" height="64" rx="12" fill="#111111" stroke="#FFFFFF" stroke-opacity="0.08"/>
+  <text x="44" y="828" fill="#6B7280" font-family="system-ui,sans-serif" font-size="12">CORPUS</text>
+  <text x="44" y="848" fill="#A1A1AA" font-family="system-ui,sans-serif" font-size="13">Matric Physics - grounded</text>
+  <!-- Main -->
+  <text x="424" y="48" fill="#FAFAFA" font-family="system-ui,sans-serif" font-size="22" font-weight="500">Ask from the chapter</text>
+  <text x="424" y="74" fill="#6B7280" font-family="system-ui,sans-serif" font-size="13">Answers cite the active chapter only</text>
+  <!-- User message -->
+  <rect x="424" y="108" width="640" height="100" rx="14" fill="#111111" stroke="#FFFFFF" stroke-opacity="0.08"/>
+  <text x="448" y="148" fill="#FAFAFA" font-family="system-ui,sans-serif" font-size="16">Explain Newton second law using the examples in Chapter 2.</text>
+  <text x="448" y="178" fill="#6B7280" font-family="system-ui,sans-serif" font-size="13">You - Ch 2 selected</text>
+  <!-- Assistant message -->
+  <rect x="520" y="232" width="860" height="200" rx="14" fill="#FFFFFF" fill-opacity="0.04" stroke="#FFFFFF" stroke-opacity="0.08"/>
+  <text x="544" y="272" fill="#A1A1AA" font-family="system-ui,sans-serif" font-size="16">From your textbook: force equals mass times acceleration.</text>
+  <text x="544" y="304" fill="#A1A1AA" font-family="system-ui,sans-serif" font-size="16">When a 2 kg cart is pushed with 6 N, acceleration is 3 m/s2.</text>
+  <text x="544" y="336" fill="#A1A1AA" font-family="system-ui,sans-serif" font-size="16">The worked example on page 41 uses the same relation.</text>
+  <rect x="544" y="360" width="200" height="36" rx="8" fill="#111111" stroke="#FFFFFF" stroke-opacity="0.1"/>
+  <text x="560" y="384" fill="#6B7280" font-family="system-ui,sans-serif" font-size="12">Source - Ch 2 section 2.3</text>
+  <!-- Follow-up -->
+  <rect x="424" y="460" width="560" height="72" rx="14" fill="#111111" stroke="#FFFFFF" stroke-opacity="0.08"/>
+  <text x="448" y="504" fill="#FAFAFA" font-family="system-ui,sans-serif" font-size="15">What if the mass doubles?</text>
+  <rect x="520" y="556" width="860" height="120" rx="14" fill="#FFFFFF" fill-opacity="0.04" stroke="#FFFFFF" stroke-opacity="0.08"/>
+  <text x="544" y="596" fill="#A1A1AA" font-family="system-ui,sans-serif" font-size="15">Acceleration halves to 1.5 m/s2 if force stays 6 N.</text>
+  <text x="544" y="628" fill="#A1A1AA" font-family="system-ui,sans-serif" font-size="15">Same chapter formula - F = ma - rearranged for a.</text>
+  <text x="544" y="652" fill="#6B7280" font-family="system-ui,sans-serif" font-size="12">Source - Ch 2 section 2.3</text>
+  <!-- Composer -->
+  <rect x="424" y="800" width="956" height="64" rx="14" fill="#111111" stroke="#FFFFFF" stroke-opacity="0.1"/>
+  <text x="448" y="838" fill="#6B7280" font-family="system-ui,sans-serif" font-size="15">Ask a syllabus question...</text>
+  <rect x="1280" y="812" width="80" height="40" rx="10" fill="#FAFAFA"/>
+  <text x="1302" y="838" fill="#0A0A0A" font-family="system-ui,sans-serif" font-size="13" font-weight="500">Ask</text>
+</svg>

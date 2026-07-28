@@ -28,7 +28,7 @@ export function AmbientOrbDust({
     const positions = new Float32Array(DUST_COUNT * 3)
     const colors = new Float32Array(DUST_COUNT * 3)
     const seeds = new Float32Array(DUST_COUNT)
-    const gold = new THREE.Color('#C6A15B')
+    const gold = new THREE.Color('#E4E4E7')
     const white = new THREE.Color('#f5f4f0')
 
     for (let i = 0; i < DUST_COUNT; i++) {

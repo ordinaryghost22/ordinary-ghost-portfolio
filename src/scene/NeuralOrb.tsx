@@ -25,7 +25,7 @@ import { ORB_BASE_SCALE } from '@/scene/orbVisualParams'
 import type { OrbHoverState } from '@/scene/orbHover'
 import { sceneRuntimeRef } from '@/scene/sceneRuntime'
 
-const GOLD = new THREE.Color('#C6A15B')
+const GOLD = new THREE.Color('#E4E4E7')
 const LERP = 0.05
 const MOUSE_TILT_LERP = 0.05
 const MORPH_LERP = 0.045

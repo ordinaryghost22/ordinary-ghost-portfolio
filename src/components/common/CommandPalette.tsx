@@ -155,7 +155,7 @@ export function CommandPalette() {
       {
         id: 'download-resume',
         label: 'Download CV (PDF)',
-        description: 'Save Shayan_Ahmed_CV.pdf to your device.',
+        description: 'Download the resume PDF.',
         keywords: 'resume cv download pdf',
         icon: Download,
         group: 'Actions',
@@ -336,6 +336,7 @@ export function CommandPalette() {
               <div className="flex items-center gap-3 border-b border-border/60 px-4 py-3">
                 <Search
                   className="size-4 shrink-0 text-muted-foreground"
+                  strokeWidth={1.5}
                   aria-hidden
                 />
                 <input
@@ -359,7 +360,7 @@ export function CommandPalette() {
               </div>
 
               <div className="flex items-center gap-2 border-b border-border/40 px-4 py-2">
-                <Sparkles className="size-3 text-primary" aria-hidden />
+                <Sparkles className="size-3 text-primary" strokeWidth={1.5} aria-hidden />
                 <p
                   id={titleId}
                   className="font-mono text-[10px] tracking-[0.14em] text-muted-foreground uppercase"
@@ -407,6 +408,7 @@ export function CommandPalette() {
                             'mt-0.5 size-4 shrink-0',
                             active ? 'text-primary' : 'text-muted-foreground',
                           )}
+                          strokeWidth={1.5}
                           aria-hidden
                         />
                         <span className="min-w-0 flex-1">

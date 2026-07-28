@@ -35,11 +35,11 @@ export function EntranceBlurOverlay() {
         background: `
           linear-gradient(
             90deg,
-            rgb(9 9 11 / ${0.18 * strength}) 0%,
+            rgb(9 9 9 / ${0.18 * strength}) 0%,
             transparent 28%,
-            rgb(212 175 55 / ${0.06 * strength}) 50%,
+            rgb(255 255 255 / ${0.03 * strength}) 50%,
             transparent 72%,
-            rgb(9 9 11 / ${0.18 * strength}) 100%
+            rgb(9 9 9 / ${0.18 * strength}) 100%
           )
         `,
         transform: `scaleX(${1 + strength * 0.035}) scaleY(${1 + strength * 0.02})`,

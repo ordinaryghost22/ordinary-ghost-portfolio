@@ -161,10 +161,10 @@ export function CustomCursor() {
           className={cn(
             '-translate-x-1/2 -translate-y-1/2 rounded-full border',
             mode === 'magnetic'
-              ? 'border-primary/90'
+              ? 'border-white/70'
               : mode === 'hover'
-                ? 'border-primary/70'
-                : 'border-primary/45',
+                ? 'border-white/50'
+                : 'border-white/30',
           )}
           animate={{
             opacity: visible && mode !== 'view' ? 1 : 0,
@@ -189,7 +189,7 @@ export function CustomCursor() {
               animate={{ opacity: visible ? 1 : 0, scale: 1 }}
               exit={{ opacity: 0, scale: 0.85 }}
               transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="-translate-x-1/2 -translate-y-1/2 rounded-full border border-primary bg-primary/15 px-3 py-1 font-mono text-[10px] tracking-[0.14em] text-primary uppercase backdrop-blur-sm"
+              className="-translate-x-1/2 -translate-y-1/2 rounded-[14px] border border-white/16 bg-white/10 px-3 py-1 text-[12px] font-medium tracking-[-0.01em] text-[#FAFAFA] uppercase backdrop-blur-sm"
             >
               View →
             </motion.div>
@@ -202,7 +202,7 @@ export function CustomCursor() {
                 scale: dotScale,
               }}
               transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-              className="-translate-x-1/2 -translate-y-1/2 size-1.5 rounded-full bg-primary"
+              className="-translate-x-1/2 -translate-y-1/2 size-1.5 rounded-full bg-[#FAFAFA]"
             />
           )}
         </AnimatePresence>

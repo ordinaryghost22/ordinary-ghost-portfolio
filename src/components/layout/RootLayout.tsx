@@ -2,10 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Outlet } from 'react-router-dom'
 
 import { AmbientSceneBackdrop } from '@/components/common/AmbientSceneBackdrop'
-import { BootOverlay } from '@/components/common/BootOverlay'
 import { CommandPalette } from '@/components/common/CommandPalette'
-import { CustomCursor } from '@/components/common/CustomCursor'
-import { EntranceBlurOverlay } from '@/components/common/EntranceBlurOverlay'
 import { GrainOverlay } from '@/components/common/GrainOverlay'
 import { WarpFadeOverlay } from '@/components/common/WarpFadeOverlay'
 import { Footer } from '@/components/layout/Footer'
@@ -48,7 +45,6 @@ export function RootLayout({ className }: RootLayoutProps) {
                 className,
               )}
             >
-              <CustomCursor />
               <Navbar />
               <main className="relative z-20 flex-1 pointer-events-auto">
                 <Outlet />
@@ -56,9 +52,7 @@ export function RootLayout({ className }: RootLayoutProps) {
               <Footer />
             </div>
 
-            <EntranceBlurOverlay />
             <WarpFadeOverlay />
-            <BootOverlay />
             <CommandPalette />
           </SkillHighlightProvider>
         </SceneControlsProvider>

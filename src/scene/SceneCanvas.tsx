@@ -241,32 +241,24 @@ const WebGLLayer = memo(function WebGLLayer({
 })
 
 /**
- * Persistent fixed WebGL hero layer — mounts immediately at full opacity.
- * Above ambient grid (z-0), below UI (z-20).
- * Loaded client-side only via React.lazy (Vite equivalent of next/dynamic ssr:false).
+ * Persistent fixed WebGL layer — visible during boot cinema only.
+ * After intro, the hero moon owns the visual identity; canvas stays
+ * mounted (opacity 0) so camera warp controllers keep working.
  */
 export function SceneCanvas() {
   const lowPowerHint = useEffectiveLowPower()
   const { phase, playIntro, heroReady } = useIntro()
-  /** Full-bleed while intro cinema runs; mobile crop only after hero settles */
+  /** Full-bleed while intro cinema runs */
   const cinemaOrb = playIntro && !heroReady
+  const visible = phase === 'boot' || cinemaOrb
 
   return (
     <div
       aria-hidden
       data-loaded="true"
       className={cn(
-        'pointer-events-none fixed inset-0 z-0 bg-transparent',
-        cinemaOrb || phase === 'boot'
-          ? 'opacity-90'
-          : 'max-md:opacity-90 md:opacity-70',
-        !cinemaOrb &&
-          cn(
-            // Mobile: orb sits behind the dense content block (not mid-void)
-            'max-md:inset-auto max-md:top-16 max-md:left-1/2 max-md:h-[min(85vw,360px)] max-md:w-[min(85vw,360px)] max-md:max-w-none max-md:-translate-x-1/2 max-md:touch-pan-y',
-            // Desktop: full-bleed stage
-            'md:inset-0 md:top-0 md:left-0 md:h-full md:w-full md:translate-x-0',
-          ),
+        'pointer-events-none fixed inset-0 z-0 bg-transparent transition-opacity duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]',
+        visible ? 'opacity-90' : 'opacity-0',
       )}
       style={{ pointerEvents: 'none', touchAction: 'pan-y' }}
     >

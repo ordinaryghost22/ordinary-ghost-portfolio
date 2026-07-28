@@ -1,190 +1,180 @@
 import { motion, useReducedMotion } from 'framer-motion'
-import { Check, Copy, Phone } from 'lucide-react'
-import { useCallback, useState } from 'react'
+import type { ReactNode } from 'react'
 
-import { MagneticAnchor, RevealText, TextBackdrop } from '@/components/common'
+import { RevealText } from '@/components/common/RevealText'
 import {
   CONTACT_EMAIL,
-  CONTACT_PHONE,
-  CONTACT_TEL_HREF,
-  CONTACT_WHATSAPP_HREF,
-  socialBadgeClassName,
+  CONTACT_LOCATION,
+  contactContent,
   socialLinks,
 } from '@/data/contact'
 import {
-  useGsapParallaxScrub,
-  useGsapSectionRef,
-  useGsapStaggerReveal,
-} from '@/hooks/useGsapScroll'
+  BODY_CLASS,
+  COL_HEADING,
+  LABEL_CLASS,
+  META_CLASS,
+  PAGE_SHELL,
+  TEXT_LINK_CLASS,
+  TEXT_LINK_UNDERLINE,
+} from '@/lib/editorial'
+import { DURATION, VIEWPORT, fadeUp, staggerContainer } from '@/lib/motion'
 import { playUiSound } from '@/lib/uiSounds'
-import { VIEWPORT, fadeUp, staggerContainer } from '@/lib/motion'
 import { cn } from '@/lib/utils'
 
-function CopyEmailButton() {
-  const [copied, setCopied] = useState(false)
+const linkedIn = socialLinks.find((link) => link.id === 'linkedin')
+const gitHub = socialLinks.find((link) => link.id === 'github')
 
-  const onCopy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(CONTACT_EMAIL)
-      setCopied(true)
-      void playUiSound('success')
-      window.setTimeout(() => setCopied(false), 1600)
-    } catch {
-      // clipboard unavailable
-    }
-  }, [])
+const valueClassName = cn(
+  TEXT_LINK_CLASS,
+  'text-zinc-300 hover:text-white',
+)
 
+function MetaBlock({
+  label,
+  children,
+}: {
+  label: string
+  children: ReactNode
+}) {
   return (
-    <button
-      type="button"
-      onClick={() => {
-        void onCopy()
-      }}
-      onPointerEnter={() => {
-        void playUiSound('hover')
-      }}
-      aria-label={copied ? 'Email copied' : 'Copy email address'}
-      className={cn(
-        'inline-flex size-9 items-center justify-center rounded-lg border border-neutral-800 bg-neutral-900/60',
-        'text-neutral-400 transition-all duration-300',
-        'hover:border-amber-400/50 hover:bg-amber-400/10 hover:text-amber-400',
-        'hover:shadow-[0_0_15px_rgba(245,158,11,0.2)]',
-        'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
-      )}
+    <div>
+      <dt className={cn(META_CLASS, 'mb-2 uppercase')}>{label}</dt>
+      <dd>{children}</dd>
+    </div>
+  )
+}
+
+function ExternalArrow() {
+  return (
+    <span
+      aria-hidden
+      className="inline-block transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
     >
-      {copied ? (
-        <Check className="size-4" aria-hidden />
-      ) : (
-        <Copy className="size-4" aria-hidden />
-      )}
-    </button>
+      ↗
+    </span>
   )
 }
 
 export function Contact() {
-  const reduceMotion = useReducedMotion()
-  const sectionRef = useGsapSectionRef<HTMLElement>()
-
-  useGsapStaggerReveal(sectionRef, '.gsap-reveal')
-  useGsapParallaxScrub(sectionRef, '.gsap-parallax', 28)
+  const reduceMotion = !!useReducedMotion()
 
   return (
     <motion.section
-      ref={sectionRef}
       id="contact"
       aria-labelledby="contact-heading"
-      className="relative z-[1] border-t border-border/60"
-      variants={staggerContainer({
-        reduceMotion: !!reduceMotion,
-      })}
+      className="relative z-[1] border-t border-zinc-900"
+      variants={staggerContainer({ reduceMotion })}
       initial="hidden"
       whileInView="visible"
       viewport={VIEWPORT}
     >
-      <div className="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8">
-        <TextBackdrop className="gsap-parallax max-w-3xl">
-          <RevealText
-            as="p"
-            className="font-mono text-xs tracking-[0.18em] text-primary uppercase"
-          >
-            Contact
+      <div className={cn(PAGE_SHELL, 'pt-24 pb-32 lg:pt-32 lg:pb-40')}>
+        <div className={COL_HEADING}>
+          <RevealText independent={false} as="p" className={LABEL_CLASS}>
+            06 — Contact
           </RevealText>
 
           <RevealText
+            independent={false}
             as="h2"
             id="contact-heading"
-            className="mt-5 font-display text-4xl font-semibold tracking-[-0.03em] text-foreground sm:text-5xl md:text-6xl"
+            className="og-hero-display mt-5 text-[clamp(2rem,4.5vw,3.25rem)] text-zinc-50"
           >
-            Let&apos;s build something
+            {contactContent.heading}
           </RevealText>
 
           <RevealText
+            independent={false}
             as="p"
-            className="mt-7 max-w-xl text-base leading-relaxed text-pretty text-muted-foreground sm:text-lg"
+            className={cn(BODY_CLASS, 'mt-5 max-w-[38ch] text-[18px]')}
           >
-            Open to product collaborations, AI systems work, and focused
-            engineering engagements. One message is enough to start.
+            <span className="block">{contactContent.supporting[0]}</span>
+            <span className="mt-1 block">{contactContent.supporting[1]}</span>
           </RevealText>
 
           <motion.div
-            variants={fadeUp({ reduceMotion: !!reduceMotion })}
-            className="gsap-reveal mt-12 flex flex-wrap items-center gap-3"
-          >
-            <MagneticAnchor
-              href={`mailto:${CONTACT_EMAIL}`}
-              className={cn(
-                'inline-block cursor-pointer font-mono text-xl text-neutral-100 sm:text-2xl',
-                'transition-all duration-300 hover:text-amber-400',
-                'hover:drop-shadow-[0_0_15px_rgba(245,158,11,0.6)]',
-                'focus-visible:text-amber-400 focus-visible:outline-none',
-              )}
-            >
-              {CONTACT_EMAIL} ↗
-            </MagneticAnchor>
-            <CopyEmailButton />
-          </motion.div>
-
-          <motion.div
-            variants={fadeUp({ reduceMotion: !!reduceMotion })}
-            className="gsap-reveal mt-5"
+            variants={fadeUp({
+              reduceMotion,
+              duration: DURATION.section,
+            })}
+            className="mt-10"
           >
             <a
-              href={CONTACT_WHATSAPP_HREF}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={`mailto:${CONTACT_EMAIL}`}
               onPointerEnter={() => {
                 void playUiSound('hover')
               }}
-              onClick={() => {
-                void playUiSound('click')
-              }}
               className={cn(
-                'inline-flex items-center gap-2 font-mono text-sm text-neutral-400 sm:text-base',
-                'transition-all duration-300 hover:text-amber-400',
-                'hover:drop-shadow-[0_0_12px_rgba(245,158,11,0.45)]',
-                'focus-visible:text-amber-400 focus-visible:outline-none',
+                TEXT_LINK_CLASS,
+                TEXT_LINK_UNDERLINE,
+                'text-[15px] sm:text-base',
               )}
             >
-              <Phone className="size-4 shrink-0" aria-hidden />
-              <span>{CONTACT_PHONE}</span>
-              <span className="text-neutral-600">· WhatsApp</span>
+              {CONTACT_EMAIL}
+              <span aria-hidden>↗</span>
             </a>
-            <span className="sr-only">
-              Also available via{' '}
-              <a href={CONTACT_TEL_HREF}>{CONTACT_PHONE}</a>
-            </span>
           </motion.div>
+        </div>
 
-          <motion.ul
-            variants={fadeUp({ reduceMotion: !!reduceMotion })}
-            className="gsap-reveal mt-10 flex flex-wrap gap-3"
-          >
-            {socialLinks.map((link) => {
-              const Icon = link.icon
-              return (
-                <li key={link.id}>
-                  <a
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onPointerEnter={() => {
-                      void playUiSound('hover')
-                    }}
-                    onClick={() => {
-                      void playUiSound('click')
-                    }}
-                    className={socialBadgeClassName}
-                  >
-                    <Icon className="size-4 shrink-0" aria-hidden />
-                    <span className="font-mono text-xs tracking-[0.12em] uppercase">
-                      {link.label}
-                    </span>
-                  </a>
-                </li>
-              )
-            })}
-          </motion.ul>
-        </TextBackdrop>
+        <motion.dl
+          variants={fadeUp({
+            reduceMotion,
+            duration: DURATION.section,
+          })}
+          className="col-span-full mt-16 grid w-full grid-cols-2 gap-8 border-t border-zinc-800/80 pt-12 md:grid-cols-4"
+        >
+          <MetaBlock label={contactContent.details.email}>
+            <a
+              href={`mailto:${CONTACT_EMAIL}`}
+              onPointerEnter={() => {
+                void playUiSound('hover')
+              }}
+              className={valueClassName}
+            >
+              {CONTACT_EMAIL}
+            </a>
+          </MetaBlock>
+
+          {linkedIn ? (
+            <MetaBlock label={contactContent.details.linkedin}>
+              <a
+                href={linkedIn.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                onPointerEnter={() => {
+                  void playUiSound('hover')
+                }}
+                className={valueClassName}
+              >
+                {linkedIn.label}
+                <ExternalArrow />
+              </a>
+            </MetaBlock>
+          ) : null}
+
+          {gitHub ? (
+            <MetaBlock label={contactContent.details.github}>
+              <a
+                href={gitHub.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                onPointerEnter={() => {
+                  void playUiSound('hover')
+                }}
+                className={valueClassName}
+              >
+                {gitHub.label}
+                <ExternalArrow />
+              </a>
+            </MetaBlock>
+          ) : null}
+
+          <MetaBlock label={contactContent.details.location}>
+            <p className="text-sm font-medium text-zinc-300">
+              {CONTACT_LOCATION}
+            </p>
+          </MetaBlock>
+        </motion.dl>
       </div>
     </motion.section>
   )

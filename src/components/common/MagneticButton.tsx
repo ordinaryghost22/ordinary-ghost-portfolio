@@ -22,8 +22,8 @@ type MagneticCoreProps = {
   /** Class for the outer magnetic motion wrapper */
   containerClassName?: string
   /**
-   * Trailing glyph (e.g. →) that travels farther than the shell
-   * for a layered depth effect.
+   * Trailing glyph (e.g. →) that travels 3px on hover
+   * for engineered depth — not a bounce.
    */
   depthGlyph?: ReactNode
   /** Play UI hover/click sounds (respects global mute) */
@@ -33,10 +33,10 @@ type MagneticCoreProps = {
 const baseClass =
   'inline-flex items-center justify-center gap-2 will-change-transform'
 
-/** Pull factor for the button shell toward the cursor */
-const SHELL_PULL = 0.2
-/** Icon travels farther than the shell for depth */
-const GLYPH_PULL = 0.38
+/** Subtle magnetic pull — restraint over spectacle */
+const SHELL_PULL = 0.12
+/** Glyph travels slightly farther than the shell */
+const GLYPH_PULL = 0.22
 
 /**
  * Translate toward cursor: distance from center × pull factor.
@@ -98,7 +98,7 @@ function MagneticChildren({
       <span className="relative z-[1]">{children}</span>
       <motion.span
         aria-hidden
-        className="relative z-[2] inline-flex will-change-transform"
+        className="og-btn-arrow relative z-[2] inline-flex will-change-transform"
         style={
           reduceMotion
             ? undefined
@@ -125,6 +125,7 @@ export function MagneticLink({
   onPointerLeave,
   onPointerMove,
   onPointerDown,
+  onPointerUp,
   ...props
 }: MagneticLinkProps) {
   const nodeRef = useRef<HTMLAnchorElement>(null)
@@ -156,7 +157,6 @@ export function MagneticLink({
         ref={nodeRef}
         className={cn(baseClass, className)}
         onPointerEnter={(event) => {
-          if (!reduceMotion) scale.set(1.05)
           if (sound) void playUiSound('hover')
           onPointerEnter?.(event)
         }}
@@ -182,8 +182,13 @@ export function MagneticLink({
           onPointerLeave?.(event)
         }}
         onPointerDown={(event) => {
+          if (!reduceMotion) scale.set(0.98)
           if (sound) void playUiSound('pop')
           onPointerDown?.(event)
+        }}
+        onPointerUp={(event) => {
+          scale.set(1)
+          onPointerUp?.(event)
         }}
         onClick={(event) => {
           if (sound) void playUiSound('click')
@@ -217,6 +222,7 @@ export function MagneticAnchor({
   onPointerLeave,
   onPointerMove,
   onPointerDown,
+  onPointerUp,
   ...props
 }: MagneticAnchorProps) {
   const nodeRef = useRef<HTMLAnchorElement>(null)
@@ -248,7 +254,6 @@ export function MagneticAnchor({
         ref={nodeRef}
         className={cn(baseClass, className)}
         onPointerEnter={(event) => {
-          if (!reduceMotion) scale.set(1.05)
           if (sound) void playUiSound('hover')
           onPointerEnter?.(event)
         }}
@@ -274,8 +279,13 @@ export function MagneticAnchor({
           onPointerLeave?.(event)
         }}
         onPointerDown={(event) => {
+          if (!reduceMotion) scale.set(0.98)
           if (sound) void playUiSound('pop')
           onPointerDown?.(event)
+        }}
+        onPointerUp={(event) => {
+          scale.set(1)
+          onPointerUp?.(event)
         }}
         onClick={(event) => {
           if (sound) void playUiSound('click')
@@ -309,6 +319,7 @@ export function MagneticNativeButton({
   onPointerLeave,
   onPointerMove,
   onPointerDown,
+  onPointerUp,
   ...props
 }: MagneticNativeButtonProps) {
   const nodeRef = useRef<HTMLButtonElement>(null)
@@ -341,7 +352,6 @@ export function MagneticNativeButton({
         ref={nodeRef}
         className={cn(baseClass, className)}
         onPointerEnter={(event) => {
-          if (!reduceMotion) scale.set(1.05)
           if (sound) void playUiSound('hover')
           onPointerEnter?.(event)
         }}
@@ -367,8 +377,13 @@ export function MagneticNativeButton({
           onPointerLeave?.(event)
         }}
         onPointerDown={(event) => {
+          if (!reduceMotion) scale.set(0.98)
           if (sound) void playUiSound('pop')
           onPointerDown?.(event)
+        }}
+        onPointerUp={(event) => {
+          scale.set(1)
+          onPointerUp?.(event)
         }}
         onClick={(event) => {
           if (sound) void playUiSound('click')

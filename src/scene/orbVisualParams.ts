@@ -15,7 +15,7 @@ export const ORB_SHELL_PARAMS = {
   fresnelPower: 2.35,
   fresnelIntensity: 0.95,
   fillOpacity: 0.028,
-  color: '#C6A15B',
+  color: '#E4E4E7',
 } as const
 
 /**
@@ -26,14 +26,14 @@ export const ORB_BASE_SCALE = 0.7
 
 /**
  * Post-processing pipeline knobs for SceneCanvas.
- * Tuned for gold wireframe neon bloom + anamorphic framing.
+ * Tuned for silver wireframe + restrained bloom (no neon).
  */
 export const POST_FX_PARAMS = {
   bloom: {
-    intensity: 0.8,
-    luminanceThreshold: 0.2,
-    luminanceSmoothing: 0.4,
-    radius: 0.68,
+    intensity: 0.35,
+    luminanceThreshold: 0.35,
+    luminanceSmoothing: 0.5,
+    radius: 0.55,
   },
   vignette: {
     offset: 0.22,
@@ -41,8 +41,8 @@ export const POST_FX_PARAMS = {
   },
   /** Base anamorphic fringe (extra kick during camera entrance) */
   chromaticAberration: {
-    x: 0.0009,
-    y: 0.00045,
+    x: 0.0005,
+    y: 0.00025,
   },
-  grainOpacity: 0.08,
+  grainOpacity: 0.04,
 } as const

@@ -3,16 +3,13 @@ import { Menu, X } from 'lucide-react'
 import { useEffect, useId, useState, type MouseEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
-import { MagneticLink } from '@/components/common'
-import { SoundToggle } from '@/components/common/SoundToggle'
 import { useIntro } from '@/hooks/useIntro'
 import { ctaItem, navItems, type NavItem } from '@/data/navigation'
 import { useActiveSection } from '@/hooks/useActiveSection'
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
-import { useEffectiveLowPower } from '@/hooks/useEffectiveLowPower'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useScrolled } from '@/hooks/useScrolled'
-import { EASE_OUT_EXPO, fadeDown, staggerContainer } from '@/lib/motion'
+import { DURATION, EASE_OUT, fadeDown, staggerContainer } from '@/lib/motion'
 import {
   navigateWithCameraWarp,
   scrollToSection,
@@ -29,35 +26,31 @@ function sectionIdFromItem(item: NavItem) {
   return item.hash ?? sectionIdFromHref(item.href)
 }
 
-function resolveActiveSection(hash: string, spyId: string) {
-  const fromHash = hash.replace(/^#/, '')
-  // Explicit home hash always wins; empty hash trusts scroll-spy (defaults to home)
-  if (!fromHash) return spyId || 'home'
-  if (fromHash === 'home') return 'home'
-  return fromHash
-}
-
 type NavLinkProps = {
   item: NavItem
   active: boolean
   onNavigate?: () => void
+  onActivate?: (sectionId: string) => void
   className?: string
-  showIndicator?: boolean
+  variant?: 'desktop' | 'mobile'
 }
 
 function NavLinkItem({
   item,
   active,
   onNavigate,
+  onActivate,
   className,
-  showIndicator = true,
+  variant = 'desktop',
 }: NavLinkProps) {
   const navigate = useNavigate()
   const sectionId = sectionIdFromItem(item)
+  const isMobile = variant === 'mobile'
 
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault()
     void playUiSound('click')
+    onActivate?.(sectionId)
     navigate(item.href, { replace: false })
     requestAnimationFrame(() => {
       navigateWithCameraWarp(sectionId)
@@ -74,68 +67,72 @@ function NavLinkItem({
       }}
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'og-interactive relative rounded-md px-3 py-2 text-sm font-medium',
+        'relative inline-flex items-center font-[family-name:Inter,ui-sans-serif,system-ui,sans-serif] font-medium tracking-[-0.01em] text-[#F2F1EE]',
+        'transition-opacity duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)]',
         'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
-        active
-          ? 'text-foreground'
-          : 'text-muted-foreground hover:text-primary',
+        isMobile ? 'w-full px-4 py-4 text-[18px]' : 'px-1 py-2 text-[14px]',
+        active ? 'opacity-100' : 'opacity-45 hover:opacity-100',
         className,
       )}
     >
-      {item.label}
-      {showIndicator && active ? (
-        <motion.span
-          layoutId="nav-active-indicator"
-          className="absolute inset-x-3 -bottom-[6px] h-px bg-primary"
-          transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-        />
-      ) : null}
+      <span className="relative inline-flex items-center pl-3">
+        {active ? (
+          <span
+            aria-hidden
+            className="absolute top-1/2 left-0 size-[3px] -translate-y-1/2 rounded-full bg-[#F2F1EE]"
+          />
+        ) : null}
+        <span>{item.label}</span>
+      </span>
     </Link>
   )
 }
 
 type CtaButtonProps = {
   onNavigate?: () => void
+  onActivate?: (sectionId: string) => void
   className?: string
 }
 
-function CtaButton({ onNavigate, className }: CtaButtonProps) {
+function CtaButton({ onNavigate, onActivate, className }: CtaButtonProps) {
   const navigate = useNavigate()
-  const lowPower = useEffectiveLowPower()
 
   return (
-    <MagneticLink
+    <Link
       to={ctaItem.href}
       onClick={(event) => {
         event.preventDefault()
+        void playUiSound('click')
+        onActivate?.(ctaItem.hash)
         navigate(ctaItem.href)
         requestAnimationFrame(() => {
           navigateWithCameraWarp(ctaItem.hash)
         })
         onNavigate?.()
       }}
-      depthGlyph={<span className="text-[0.95em]">→</span>}
+      onPointerEnter={() => {
+        void playUiSound('hover')
+      }}
       className={cn(
-        'og-btn og-interactive h-11 gap-2 rounded-full px-6 text-sm text-primary-foreground',
-        lowPower ? 'og-glass-cta-fallback' : 'og-glass-cta',
-        'hover:brightness-110',
-        'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none',
+        'inline-flex h-[46px] items-center justify-center px-6',
+        'rounded-[14px] border border-[#F2F1EE] bg-transparent',
+        'font-[family-name:Inter,ui-sans-serif,system-ui,sans-serif] text-[14px] font-medium tracking-[-0.01em] text-[#F2F1EE]',
+        'transition-[opacity,background-color,color,border-color] duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)]',
+        'hover:bg-[#F2F1EE] hover:text-[#0A0B0E]',
+        'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
         className,
       )}
-      data-magnetic
-      data-cursor="magnetic"
     >
       {ctaItem.label}
-    </MagneticLink>
+    </Link>
   )
 }
 
 export function Navbar() {
-  const scrolled = useScrolled(80)
-  const spySection = useActiveSection()
+  const scrolled = useScrolled(24)
+  const { activeSectionId, setActiveSection } = useActiveSection()
   const location = useLocation()
   const navigate = useNavigate()
-  const activeSection = resolveActiveSection(location.hash, spySection)
   const [mobileOpen, setMobileOpen] = useState(false)
   const menuId = useId()
   const reduceMotion = useReducedMotion()
@@ -182,22 +179,30 @@ export function Navbar() {
   const closeMobile = () => setMobileOpen(false)
   const animate = !reduceMotion
   const useEntrance = playIntro
+  const surfaceOn = scrolled || mobileOpen
 
   return (
     <header className="sticky top-0 z-50 w-full">
       <motion.div
         aria-hidden
-        className="pointer-events-none absolute inset-0 border-b border-border bg-card/80 backdrop-blur-[12px]"
+        className="pointer-events-none absolute inset-0 border-b border-[#1C1C1D] bg-[#0A0B0E]/80 backdrop-blur-xl"
         initial={false}
-        animate={{ opacity: scrolled || mobileOpen ? 1 : 0 }}
-        transition={{ duration: animate ? 0.3 : 0, ease: EASE_OUT_EXPO }}
+        animate={{ opacity: surfaceOn ? 1 : 0 }}
+        transition={{
+          duration: animate ? DURATION.card : 0,
+          ease: EASE_OUT,
+        }}
       />
 
       <motion.nav
-        className="relative mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8"
+        className={cn(
+          'relative mx-auto flex h-20 w-full max-w-6xl items-center justify-between',
+          'px-8 md:px-16 lg:px-24',
+          'font-[family-name:Inter,ui-sans-serif,system-ui,sans-serif]',
+        )}
         aria-label="Primary"
         variants={staggerContainer({
-          stagger: 0.05,
+          stagger: 0.04,
           delay: 0,
           reduceMotion: !useEntrance,
           compact,
@@ -206,18 +211,26 @@ export function Navbar() {
         animate={navReady || !useEntrance ? 'visible' : 'hidden'}
       >
         <motion.div
+          className="relative z-10 shrink-0"
           variants={fadeDown({
-            y: -8,
-            duration: 0.35,
+            y: -6,
+            duration: DURATION.section,
             reduceMotion: !useEntrance,
           })}
         >
           <Link
             to="/#home"
-            className="og-interactive font-display text-base font-semibold tracking-[-0.02em] text-foreground hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+            className={cn(
+              'inline-flex items-center text-[15px] font-medium tracking-[-0.03em] text-[#F2F1EE]',
+              'translate-y-px',
+              'transition-opacity duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)]',
+              'hover:opacity-70',
+              'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+            )}
             onClick={(event) => {
               event.preventDefault()
               closeMobile()
+              setActiveSection('home')
               navigate('/#home')
               requestAnimationFrame(() => {
                 scrollToSection('home')
@@ -229,9 +242,9 @@ export function Navbar() {
         </motion.div>
 
         <motion.div
-          className="hidden items-center gap-1 md:flex"
+          className="absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-8 lg:flex"
           variants={staggerContainer({
-            stagger: 0.05,
+            stagger: 0.03,
             delay: 0,
             reduceMotion: !useEntrance,
             compact,
@@ -241,38 +254,38 @@ export function Navbar() {
             <motion.div
               key={item.label}
               variants={fadeDown({
-                y: -8,
-                duration: 0.35,
+                y: -6,
+                duration: DURATION.section,
                 reduceMotion: !useEntrance,
               })}
             >
               <NavLinkItem
                 item={item}
-                active={activeSection === sectionIdFromItem(item)}
+                active={activeSectionId === sectionIdFromItem(item)}
+                onActivate={setActiveSection}
               />
             </motion.div>
           ))}
         </motion.div>
 
         <motion.div
-          className="flex items-center gap-2"
+          className="relative z-10 flex shrink-0 items-center gap-4"
           variants={fadeDown({
-            y: -8,
-            duration: 0.35,
+            y: -6,
+            duration: DURATION.section,
             reduceMotion: !useEntrance,
           })}
         >
-          <SoundToggle className="hidden sm:inline-flex" />
-
-          <div className="hidden md:block">
-            <CtaButton />
+          <div className="hidden lg:block">
+            <CtaButton onActivate={setActiveSection} />
           </div>
 
           <button
             type="button"
             className={cn(
-              'og-interactive inline-flex size-10 items-center justify-center rounded-md text-foreground md:hidden',
-              'hover:bg-foreground/5 hover:text-primary',
+              'inline-flex size-[46px] items-center justify-center text-[#F2F1EE] lg:hidden',
+              'transition-opacity duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)]',
+              'hover:opacity-70',
               'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
             )}
             aria-expanded={mobileOpen}
@@ -284,9 +297,9 @@ export function Navbar() {
             }}
           >
             {mobileOpen ? (
-              <X className="size-5" aria-hidden />
+              <X className="size-5" strokeWidth={1.5} aria-hidden />
             ) : (
-              <Menu className="size-5" aria-hidden />
+              <Menu className="size-5" strokeWidth={1.5} aria-hidden />
             )}
           </button>
         </motion.div>
@@ -294,37 +307,85 @@ export function Navbar() {
 
       <AnimatePresence>
         {mobileOpen ? (
-          <motion.div
-            id={menuId}
-            key="mobile-nav"
-            initial={reduceMotion ? false : { opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={reduceMotion ? undefined : { opacity: 0, y: -8 }}
-            transition={{
-              duration: reduceMotion ? 0 : 0.22,
-              ease: EASE_OUT_EXPO,
-            }}
-            className="relative border-t border-border md:hidden"
-          >
-            <div className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-4 sm:px-6">
-              <div className="mb-2 flex justify-end px-1 sm:hidden">
-                <SoundToggle />
+          <>
+            <motion.button
+              key="mobile-nav-backdrop"
+              type="button"
+              aria-label="Close menu"
+              className="fixed inset-0 z-40 bg-[#0A0B0E]/60 backdrop-blur-sm lg:hidden"
+              initial={reduceMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={reduceMotion ? undefined : { opacity: 0 }}
+              transition={{
+                duration: reduceMotion ? 0 : DURATION.hover,
+                ease: EASE_OUT,
+              }}
+              onClick={closeMobile}
+            />
+
+            <motion.aside
+              id={menuId}
+              key="mobile-nav-drawer"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Navigation"
+              className={cn(
+                'fixed top-0 right-0 z-50 flex h-dvh w-[min(100%,20rem)] flex-col',
+                'border-l border-[#1C1C1D] bg-[#0A0B0E]/95 backdrop-blur-xl lg:hidden',
+                'font-[family-name:Inter,ui-sans-serif,system-ui,sans-serif]',
+              )}
+              initial={reduceMotion ? false : { x: '100%' }}
+              animate={{ x: 0 }}
+              exit={reduceMotion ? undefined : { x: '100%' }}
+              transition={{
+                duration: reduceMotion ? 0 : DURATION.card,
+                ease: EASE_OUT,
+              }}
+            >
+              <div className="flex h-20 items-center justify-between px-6">
+                <span className="text-[15px] font-medium tracking-[-0.03em] text-[#F2F1EE]">
+                  Menu
+                </span>
+                <button
+                  type="button"
+                  className={cn(
+                    'inline-flex size-[46px] items-center justify-center text-[#F2F1EE]',
+                    'transition-opacity duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)]',
+                    'hover:opacity-70',
+                    'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+                  )}
+                  aria-label="Close menu"
+                  onClick={() => {
+                    void playUiSound('close')
+                    closeMobile()
+                  }}
+                >
+                  <X className="size-5" strokeWidth={1.5} aria-hidden />
+                </button>
               </div>
-              {navItems.map((item) => (
-                <NavLinkItem
-                  key={item.label}
-                  item={item}
-                  active={activeSection === sectionIdFromItem(item)}
-                  onNavigate={closeMobile}
-                  showIndicator={false}
-                  className="w-full px-3 py-3 text-base"
-                />
-              ))}
-              <div className="pt-3">
-                <CtaButton onNavigate={closeMobile} className="w-full" />
+
+              <div className="flex flex-1 flex-col gap-1 overflow-y-auto px-4 pb-8">
+                {navItems.map((item) => (
+                  <NavLinkItem
+                    key={item.label}
+                    item={item}
+                    active={activeSectionId === sectionIdFromItem(item)}
+                    onNavigate={closeMobile}
+                    onActivate={setActiveSection}
+                    variant="mobile"
+                  />
+                ))}
+
+                <div className="mt-auto pt-8">
+                  <CtaButton
+                    onNavigate={closeMobile}
+                    onActivate={setActiveSection}
+                    className="w-full"
+                  />
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.aside>
+          </>
         ) : null}
       </AnimatePresence>
     </header>

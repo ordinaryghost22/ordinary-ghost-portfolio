@@ -5,13 +5,12 @@ import { cn } from '@/lib/utils'
 type SurfacePanelProps = {
   children: ReactNode
   className?: string
-  /** Soft gold edge light at top */
+  /** Soft top edge light — monochrome hairline */
   edgeLight?: boolean
 }
 
 /**
- * Opaque frosted panel — kills orb mesh through content while keeping
- * a premium glass edge (not a flat cardboard card).
+ * Opaque frosted panel — quiet surface for content over the canvas.
  */
 export function SurfacePanel({
   children,
@@ -21,20 +20,16 @@ export function SurfacePanel({
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-xl border border-border/70',
-        'bg-[rgb(11_11_10/0.92)] backdrop-blur-xl',
-        'shadow-[0_24px_80px_-40px_rgb(0_0_0/0.9)]',
+        'relative overflow-hidden rounded-[20px] border border-[rgba(255,255,255,0.08)]',
+        'bg-[rgb(17_17_17/0.94)] backdrop-blur-xl',
+        'shadow-[0_4px_16px_-4px_rgb(0_0_0/0.4)]',
         className,
       )}
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgb(198_161_91/0.06),transparent_55%)]"
-      />
       {edgeLight ? (
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/55 to-transparent"
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/12 to-transparent"
         />
       ) : null}
       <div className="relative z-[1]">{children}</div>

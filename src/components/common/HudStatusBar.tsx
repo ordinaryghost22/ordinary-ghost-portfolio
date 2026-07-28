@@ -73,7 +73,7 @@ export function HudStatusBar({
         />
         <span className="text-foreground/55 max-sm:truncate">
           <span className="sm:hidden">Available</span>
-          <span className="hidden sm:inline">Available for hire</span>
+          <span className="hidden sm:inline">Available for work</span>
         </span>
       </span>
 
@@ -91,7 +91,7 @@ export function HudStatusBar({
           <span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1 normal-case tracking-normal">
             <a
               href={`mailto:${CONTACT_EMAIL}`}
-              className="text-foreground/45 transition-colors hover:text-amber-400"
+              className="text-foreground/45 transition-colors duration-[180ms] hover:text-[#FAFAFA]"
             >
               {CONTACT_EMAIL}
             </a>
@@ -102,7 +102,7 @@ export function HudStatusBar({
               href={CONTACT_WHATSAPP_HREF}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-foreground/45 transition-colors hover:text-amber-400"
+              className="text-foreground/45 transition-colors duration-[180ms] hover:text-[#FAFAFA]"
             >
               {CONTACT_PHONE}
             </a>
@@ -111,7 +111,7 @@ export function HudStatusBar({
           <span className="hidden h-3 w-px bg-border/50 sm:block" aria-hidden />
 
           <span className="pointer-events-none inline-flex items-center gap-2 tabular-nums">
-            <span className={webglOk ? 'text-primary/60' : 'text-amber-400/70'}>
+            <span className={webglOk ? 'text-[#A1A1AA]' : 'text-[#6B7280]'}>
               {webglOk ? 'WEBGL OK' : 'WEBGL LOW'}
             </span>
             <span className="text-white/20">·</span>

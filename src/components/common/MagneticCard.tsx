@@ -15,11 +15,12 @@ type MagneticCardProps = {
   disabled?: boolean
 }
 
-const MAX_TILT = 8
+/** Quiet perspective — presence without spectacle */
+const MAX_TILT = 4
 
 /**
- * Case-study card shell: cursor spotlight + perspective tilt.
- * Sets --mouse-x / --mouse-y for the radial glow.
+ * Case-study card shell: soft spotlight + restrained tilt.
+ * Sets --mouse-x / --mouse-y for a monochrome wash.
  */
 export function MagneticCard({
   children,
@@ -65,7 +66,7 @@ export function MagneticCard({
           transformStyle: 'preserve-3d',
           transition: disabled
             ? undefined
-            : 'transform 180ms cubic-bezier(0.16, 1, 0.3, 1)',
+            : 'transform 250ms cubic-bezier(0.16, 1, 0.3, 1)',
         } as CSSProperties
       }
       className={cn(
@@ -77,8 +78,8 @@ export function MagneticCard({
       <div
         aria-hidden
         className={cn(
-          'pointer-events-none absolute inset-0 z-0 rounded-[inherit] opacity-0 transition-opacity duration-300',
-          'bg-[radial-gradient(600px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(245,158,11,0.12),transparent_40%)]',
+          'pointer-events-none absolute inset-0 z-0 rounded-[inherit] opacity-0 transition-opacity duration-[250ms]',
+          'bg-[radial-gradient(500px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(255,255,255,0.04),transparent_42%)]',
           !disabled && 'group-hover/card:opacity-100',
         )}
       />

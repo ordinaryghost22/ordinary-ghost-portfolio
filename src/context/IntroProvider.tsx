@@ -1,88 +1,40 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { useReducedMotion } from 'framer-motion'
+import { useCallback, useEffect, useMemo, type ReactNode } from 'react'
 
 import {
-  INTRO_NAV_MS,
-  INTRO_SETTLE_MS,
   IntroContext,
   type IntroContextValue,
-  type IntroPhase,
-  readIntroComplete,
   writeIntroComplete,
 } from '@/context/intro-context'
 import {
   resetCameraEntrance,
-  startCameraEntrance,
   unlockOrbAnchor,
 } from '@/scene/sceneRuntime'
 
+/**
+ * Intro is disabled — app lands on the hero immediately.
+ * Context kept so existing consumers (Hero, Navbar, canvas) keep working.
+ */
 export function IntroProvider({ children }: { children: ReactNode }) {
-  const reduceMotion = useReducedMotion()
-  const alreadyPlayed = useMemo(() => readIntroComplete(), [])
-  const skipCinema = alreadyPlayed || reduceMotion === true
-
-  const [phase, setPhase] = useState<IntroPhase>(
-    skipCinema ? 'ready' : 'boot',
-  )
-  const [bootProgress, setBootProgress] = useState(skipCinema ? 1 : 0)
-
-  const playIntro = !alreadyPlayed && reduceMotion === false
-
-  const completeBoot = useCallback(() => {
-    setPhase((prev) => {
-      if (prev !== 'boot') return prev
-      startCameraEntrance()
-      return 'flyin'
-    })
-    setBootProgress(1)
-  }, [])
-
-  const completeFlyin = useCallback(() => {
-    setPhase((prev) => {
-      if (prev !== 'flyin') return prev
-      return 'nav'
-    })
-  }, [])
-
-  // After fly-in: nav → hero → ready
   useEffect(() => {
-    if (phase !== 'nav') return
-
-    const toHero = window.setTimeout(() => setPhase('hero'), INTRO_NAV_MS)
-    const toReady = window.setTimeout(() => {
-      setPhase('ready')
-      writeIntroComplete()
-      unlockOrbAnchor()
-      resetCameraEntrance()
-    }, INTRO_SETTLE_MS)
-
-    return () => {
-      window.clearTimeout(toHero)
-      window.clearTimeout(toReady)
-    }
-  }, [phase])
-
-  // Honor reduced-motion after hydration
-  useEffect(() => {
-    if (reduceMotion !== true) return
-    setPhase('ready')
-    setBootProgress(1)
+    writeIntroComplete()
     unlockOrbAnchor()
     resetCameraEntrance()
-  }, [reduceMotion])
+  }, [])
+
+  const completeBoot = useCallback(() => {}, [])
+  const completeFlyin = useCallback(() => {}, [])
 
   const value = useMemo<IntroContextValue>(
     () => ({
-      phase,
-      playIntro,
-      heroReady: phase === 'hero' || phase === 'ready',
-      navReady:
-        phase === 'nav' || phase === 'hero' || phase === 'ready',
-      bootProgress,
+      phase: 'ready',
+      playIntro: false,
+      heroReady: true,
+      navReady: true,
+      bootProgress: 1,
       completeBoot,
       completeFlyin,
     }),
-    [phase, playIntro, bootProgress, completeBoot, completeFlyin],
+    [completeBoot, completeFlyin],
   )
 
   return <IntroContext.Provider value={value}>{children}</IntroContext.Provider>

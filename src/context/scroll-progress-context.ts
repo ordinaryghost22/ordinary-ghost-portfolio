@@ -18,8 +18,8 @@ export type ScrollProgressValue = {
 export const SECTION_IDS: Record<SectionKey, string> = {
   hero: 'home',
   about: 'about',
-  projects: 'projects',
-  skills: 'skills',
+  projects: 'work',
+  skills: 'method',
   resume: 'resume',
   contact: 'contact',
 }

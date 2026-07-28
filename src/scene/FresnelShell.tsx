@@ -2,7 +2,7 @@ import { useFrame } from '@react-three/fiber'
 import { useMemo, useRef } from 'react'
 import * as THREE from 'three'
 
-const GOLD = new THREE.Color('#C6A15B')
+const GOLD = new THREE.Color('#E4E4E7')
 
 /**
  * Soft Fresnel shell — edge glow only (no noise displacement).

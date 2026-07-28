@@ -1,83 +1,185 @@
 import { motion, useReducedMotion } from 'framer-motion'
+import { useState } from 'react'
 
 import { RevealText } from '@/components/common/RevealText'
-import { SkillPill } from '@/components/common/SkillPill'
-import { TextBackdrop } from '@/components/common/TextBackdrop'
-import { skillCategories } from '@/data/skills'
-import { VIEWPORT, fadeUp, staggerContainer } from '@/lib/motion'
+import { useSkillHighlight } from '@/context/skill-highlight-context'
+import {
+  capabilityGroups,
+  type Capability,
+  type CapabilityGroup,
+} from '@/data/skills'
+import { projects } from '@/data/projects'
+import {
+  BODY_CLASS,
+  COL_CONTENT,
+  COL_HEADING,
+  COL_LABEL,
+  LABEL_CLASS,
+  META_CLASS,
+  PAGE_SHELL,
+} from '@/lib/editorial'
+import { DURATION, VIEWPORT, fadeUp, staggerContainer } from '@/lib/motion'
+import { cn } from '@/lib/utils'
+
+function projectTitles(ids: string[]) {
+  return ids
+    .map((id) => projects.find((p) => p.id === id)?.title)
+    .filter((title): title is string => Boolean(title))
+}
+
+function CapabilityRow({ capability }: { capability: Capability }) {
+  const [active, setActive] = useState(false)
+  const { setHighlightedSkill } = useSkillHighlight()
+  const usedIn = projectTitles(capability.usedIn)
+  const shipTag = usedIn[0] ?? null
+
+  const activate = () => {
+    setActive(true)
+    setHighlightedSkill(capability.matchKeys[0] ?? capability.name)
+  }
+
+  const deactivate = () => {
+    setActive(false)
+    setHighlightedSkill(null)
+  }
+
+  return (
+    <li>
+      <button
+        type="button"
+        className={cn(
+          'group flex w-full cursor-pointer items-center justify-between gap-4',
+          'border-b border-zinc-800 py-3 text-left',
+          'transition-colors duration-200',
+          'hover:border-zinc-700',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0B0E]',
+          active ? 'border-zinc-700 text-white' : 'text-zinc-400',
+        )}
+        onPointerEnter={activate}
+        onPointerLeave={deactivate}
+        onFocus={activate}
+        onBlur={deactivate}
+      >
+        <span className="min-w-0 text-[16px] font-medium tracking-[-0.02em] transition-colors duration-200 group-hover:text-white sm:text-[17px]">
+          {capability.name}
+        </span>
+
+        <span
+          className={cn(
+            'flex shrink-0 items-center gap-2',
+            META_CLASS,
+            'tracking-wide opacity-0 transition-all duration-200',
+            'group-hover:translate-x-1 group-hover:opacity-100 group-focus-visible:translate-x-1 group-focus-visible:opacity-100',
+            active && 'translate-x-1 opacity-100',
+          )}
+        >
+          {shipTag ? <span className="max-w-[14ch] truncate">{shipTag}</span> : null}
+          <span aria-hidden className="text-zinc-400">
+            →
+          </span>
+        </span>
+      </button>
+    </li>
+  )
+}
+
+function CapabilityChapter({
+  group,
+  index,
+  reduceMotion,
+}: {
+  group: CapabilityGroup
+  index: number
+  reduceMotion: boolean
+}) {
+  return (
+    <motion.article
+      variants={fadeUp({ reduceMotion, duration: DURATION.section })}
+      className="border-t border-zinc-900 pt-10 first:border-t-0 first:pt-0 md:pt-12"
+    >
+      <header className="mb-6">
+        <p className={cn(META_CLASS, 'tabular-nums')}>
+          {String(index + 1).padStart(2, '0')}
+        </p>
+        <h3 className="og-hero-display mt-2 text-[22px] text-zinc-50 sm:text-[24px]">
+          {group.title}
+        </h3>
+        <p className={cn(BODY_CLASS, 'mt-3 max-w-[36ch] text-[15px]')}>
+          {group.purpose}
+        </p>
+      </header>
+
+      <ul>
+        {group.capabilities.map((capability) => (
+          <CapabilityRow key={capability.name} capability={capability} />
+        ))}
+      </ul>
+    </motion.article>
+  )
+}
 
 export function Skills() {
-  const reduceMotion = useReducedMotion()
+  const reduceMotion = !!useReducedMotion()
 
   return (
     <motion.section
-      id="skills"
+      id="method"
       aria-labelledby="skills-heading"
-      className="relative z-[1] border-t border-border/60"
-      variants={staggerContainer({
-        reduceMotion: !!reduceMotion,
-      })}
+      className="relative z-[1] border-t border-zinc-900"
+      variants={staggerContainer({ reduceMotion })}
       initial="hidden"
       whileInView="visible"
       viewport={VIEWPORT}
     >
-      <div className="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6 sm:py-28 lg:px-8">
-        <TextBackdrop className="max-w-2xl">
-          <RevealText
-            as="p"
-            className="font-mono text-xs tracking-[0.18em] text-primary uppercase"
-          >
-            Stack
-          </RevealText>
-
-          <RevealText
-            as="h2"
-            id="skills-heading"
-            className="mt-5 font-display text-3xl font-semibold tracking-[-0.02em] text-foreground sm:text-4xl md:text-5xl"
-          >
-            Tools that ship
-          </RevealText>
-
-          <p className="mt-4 max-w-lg text-sm text-muted-foreground">
-            Hover a skill to highlight projects that use it.
-          </p>
-        </TextBackdrop>
-
-        <motion.div
-          variants={staggerContainer({
-            stagger: 0.07,
-            delay: 0.04,
-            reduceMotion: !!reduceMotion,
-          })}
-          className="mt-16 grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-4"
-        >
-          {skillCategories.map((category) => (
-            <motion.div
-              key={category.label}
-              variants={fadeUp({
-                y: 16,
-                duration: 0.5,
-                reduceMotion: !!reduceMotion,
-              })}
-              className="min-w-0"
+      <div className="py-16 md:py-24 lg:py-28">
+        <div className={cn(PAGE_SHELL, 'border-b border-zinc-900 pb-12 md:pb-16')}>
+          <div className={COL_HEADING}>
+            <RevealText independent={false} as="p" className={LABEL_CLASS}>
+              04 — Method
+            </RevealText>
+            <RevealText
+              independent={false}
+              as="h2"
+              id="skills-heading"
+              className="og-hero-display mt-5 text-[clamp(2rem,4.5vw,3.25rem)] text-zinc-50"
             >
-              <p className="border-b border-border/50 pb-3 font-mono text-[11px] tracking-[0.16em] text-primary/80 uppercase">
-                {category.label}
-              </p>
+              How I work
+            </RevealText>
+            <RevealText
+              independent={false}
+              as="p"
+              className={cn(
+                BODY_CLASS,
+                'mt-5 max-w-[40ch] text-[17px] sm:text-[18px]',
+              )}
+            >
+              Across systems, product, and infrastructure. Hover a line to see
+              where it ships.
+            </RevealText>
+          </div>
+        </div>
 
-              <ul className="mt-4 flex flex-wrap gap-2">
-                {category.items.map((item) => (
-                  <li key={item} className="min-w-0">
-                    <SkillPill
-                      skill={item}
-                      reduceMotion={!!reduceMotion}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          ))}
-        </motion.div>
+        <div className={cn(PAGE_SHELL, 'pt-12 md:pt-16')}>
+          <div className={COL_LABEL}>
+            <p className={LABEL_CLASS}>Capabilities</p>
+          </div>
+          <motion.div
+            variants={staggerContainer({
+              stagger: 0.08,
+              reduceMotion,
+            })}
+            className={cn(COL_CONTENT, 'flex flex-col gap-4 md:gap-6')}
+          >
+            {capabilityGroups.map((group, index) => (
+              <CapabilityChapter
+                key={group.title}
+                group={group}
+                index={index}
+                reduceMotion={reduceMotion}
+              />
+            ))}
+          </motion.div>
+        </div>
       </div>
     </motion.section>
   )

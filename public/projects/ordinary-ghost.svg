@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" fill="none">
+  <rect width="1440" height="900" fill="#0A0A0A"/>
+  <circle cx="1080" cy="420" r="220" fill="#111111"/>
+  <circle cx="1080" cy="420" r="180" fill="none" stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="1"/>
+  <circle cx="1080" cy="420" r="140" fill="none" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="1"/>
+  <text x="72" y="72" fill="#6B7280" font-family="system-ui,sans-serif" font-size="13" letter-spacing="2">ORDINARY GHOST</text>
+  <text x="72" y="320" fill="#FAFAFA" font-family="system-ui,sans-serif" font-size="72" font-weight="500">Built slowly.</text>
+  <text x="72" y="410" fill="#FAFAFA" font-family="system-ui,sans-serif" font-size="72" font-weight="500">Meant to last.</text>
+  <text x="72" y="490" fill="#A1A1AA" font-family="system-ui,sans-serif" font-size="20">Software for businesses that cannot afford quiet failures.</text>
+  <rect x="72" y="540" width="160" height="48" rx="14" fill="#FAFAFA"/>
+  <text x="100" y="570" fill="#0A0A0A" font-family="system-ui,sans-serif" font-size="15" font-weight="500">See the work</text>
+  <rect x="248" y="540" width="120" height="48" rx="14" fill="none" stroke="#FFFFFF" stroke-opacity="0.16"/>
+  <text x="278" y="570" fill="#FAFAFA" font-family="system-ui,sans-serif" font-size="15" font-weight="500">Resume</text>
+</svg>

@@ -6,12 +6,13 @@ import { type RefObject, useRef } from 'react'
 
 gsap.registerPlugin(ScrollTrigger, useGSAP)
 
+/** Match Framer reveal language — quiet, never theatrical */
 const REVEAL = {
-  y: 60,
+  y: 14,
   opacity: 0,
-  duration: 1,
-  stagger: 0.15,
-  ease: 'power3.out',
+  duration: 0.55,
+  stagger: 0.1,
+  ease: 'power2.out',
 } as const
 
 /**
@@ -45,12 +46,11 @@ export function useGsapStaggerReveal(
           duration: REVEAL.duration,
           stagger: REVEAL.stagger,
           ease: REVEAL.ease,
-          // Clear both so remount / Strict Mode never leaves opacity:0 stuck
           clearProps: 'transform,opacity',
           immediateRender: false,
           scrollTrigger: {
             trigger: root,
-            start: 'top 82%',
+            start: 'top 85%',
             once: true,
             invalidateOnRefresh: true,
             toggleActions: 'play none none none',
@@ -68,11 +68,12 @@ export function useGsapStaggerReveal(
 
 /**
  * Subtle scrubbed parallax for section headings / backdrop type.
+ * Kept small so scroll never feels like a ride.
  */
 export function useGsapParallaxScrub(
   scopeRef: RefObject<HTMLElement | null>,
   selector: string,
-  amount = 40,
+  amount = 18,
 ) {
   const reduceMotion = useReducedMotion()
 
@@ -86,7 +87,7 @@ export function useGsapParallaxScrub(
 
       gsap.fromTo(
         targets,
-        { y: amount * 0.35 },
+        { y: amount * 0.25 },
         {
           y: -amount,
           ease: 'none',
@@ -94,7 +95,7 @@ export function useGsapParallaxScrub(
             trigger: root,
             start: 'top bottom',
             end: 'bottom top',
-            scrub: 1,
+            scrub: 1.2,
             invalidateOnRefresh: true,
           },
         },

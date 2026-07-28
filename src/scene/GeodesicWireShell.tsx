@@ -22,7 +22,7 @@ export function GeodesicWireShell({
   radius = 1.62,
   detail = 3,
   visible = true,
-  color = '#C6A15B',
+  color = '#E4E4E7',
   hoverRef,
 }: GeodesicWireShellProps) {
   const meshRef = useRef<THREE.Mesh>(null)

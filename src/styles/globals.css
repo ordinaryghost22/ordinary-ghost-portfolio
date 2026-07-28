@@ -1,6 +1,13 @@
 @import 'tailwindcss';
 
+/*
+ * Ordinary Ghost — Design System
+ * Quiet. Confident. Minimal. Precise. Timeless.
+ * Single source of truth for colour, type, space, radius, shadow, motion.
+ */
+
 @theme inline {
+  /* ── Semantic colours ─────────────────────────────────────────── */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -19,50 +26,164 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  /*
+   * Amber remapped → monochrome.
+   * Legacy page utilities (amber-*) inherit the new language without
+   * a page-by-page redesign.
+   */
+  --color-amber-50: #fafafa;
+  --color-amber-100: #f4f4f5;
+  --color-amber-200: #e4e4e7;
+  --color-amber-300: #d4d4d8;
+  --color-amber-400: #a1a1aa;
+  --color-amber-500: #71717a;
+  --color-amber-600: #52525b;
+  --color-amber-700: #3f3f46;
+  --color-amber-800: #27272a;
+  --color-amber-900: #18181b;
+  --color-amber-950: #0a0b0e;
+
+  /* ── Typography ───────────────────────────────────────────────── */
   --font-sans: var(--font-sans);
-  --font-display: var(--font-display);
-  --font-mono: var(--font-mono);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --font-display: var(--font-sans);
+  --font-mono: var(--font-sans);
+
+  --text-caption: 0.75rem; /* 12px */
+  --text-caption--line-height: 1.4;
+  --text-small: 0.875rem; /* 14px */
+  --text-small--line-height: 1.5;
+  --text-body: 1.125rem; /* 18px */
+  --text-body--line-height: 1.6;
+  --text-heading: 1.5rem; /* 24px */
+  --text-heading--line-height: 1.3;
+  --text-project: 2rem; /* 32px */
+  --text-project--line-height: 1.2;
+  --text-section: 3.25rem; /* 52px — midpoint of 48–56 */
+  --text-section--line-height: 1.1;
+  --text-hero: 4.5rem; /* 72px */
+  --text-hero--line-height: 1.05;
+
+  /* ── 8pt spacing (custom — do not override Tailwind defaults) ─── */
+  --spacing-og-8: 0.5rem;
+  --spacing-og-16: 1rem;
+  --spacing-og-24: 1.5rem;
+  --spacing-og-32: 2rem;
+  --spacing-og-48: 3rem;
+  --spacing-og-64: 4rem;
+  --spacing-og-96: 6rem;
+  --spacing-og-128: 8rem;
+
+  /* ── Radius ───────────────────────────────────────────────────── */
+  --radius-sm: var(--radius-button);
+  --radius-md: var(--radius-button);
+  --radius-lg: var(--radius-button);
+  --radius-xl: var(--radius-card);
+  --radius-2xl: var(--radius-card);
+  --radius-button: 14px;
+  --radius-card: 20px;
+  --radius-input: 14px;
+  --radius-image: 20px;
+
+  /* ── Shadows (soft elevation only) ────────────────────────────── */
+  --shadow-sm: var(--elevation-1);
+  --shadow-md: var(--elevation-2);
+  --shadow-lg: var(--elevation-3);
+
+  /* ── Motion ───────────────────────────────────────────────────── */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-hover: 180ms;
+  --duration-card: 250ms;
+  --duration-section: 550ms;
+  --duration-hero: 800ms;
 }
 
 :root {
-  /* Brand */
-  --void: #09090b;
-  --surface: #111110;
-  --ghost-white: #f5f4f0;
-  --fog: #8f8d86;
-  --mist: #48463f;
-  --gold: #c6a15b;
-  --amber: #d4af37;
-  --indigo-deep: #1e1b4b;
+  /* ── Brand palette — monochrome night OS ──────────────────────── */
+  --background: #0a0b0e;
+  --surface: #111111;
+  --surface-hover: #171717;
 
-  --background: var(--void);
-  --foreground: var(--ghost-white);
+  --foreground: #fafafa;
+  --text-secondary: #a1a1aa;
+  --text-muted: #6b7280;
+
+  --border: rgb(255 255 255 / 0.08);
+  --border-hover: rgb(255 255 255 / 0.16);
+
+  /* Semantic aliases */
   --card: var(--surface);
-  --card-foreground: var(--ghost-white);
+  --card-foreground: var(--foreground);
   --popover: var(--surface);
-  --popover-foreground: var(--ghost-white);
-  --primary: var(--gold);
-  --primary-foreground: var(--void);
-  --secondary: var(--surface);
-  --secondary-foreground: var(--ghost-white);
-  --muted: var(--surface);
-  --muted-foreground: var(--fog);
-  --accent: var(--gold);
-  --accent-foreground: var(--void);
-  --destructive: #b4543f;
-  --border: var(--mist);
-  --input: var(--mist);
-  --ring: var(--gold);
-  --radius: 0.5rem;
+  --popover-foreground: var(--foreground);
 
+  /* Primary = light foreground on dark — no accent colour */
+  --primary: #fafafa;
+  --primary-foreground: #0a0b0e;
+
+  --secondary: var(--surface);
+  --secondary-foreground: var(--foreground);
+  --muted: var(--surface);
+  --muted-foreground: var(--text-secondary);
+  --accent: var(--surface-hover);
+  --accent-foreground: var(--foreground);
+  --destructive: #b4543f;
+  --input: var(--border);
+  --ring: rgb(255 255 255 / 0.24);
+
+  /* Component radii */
+  --radius: 14px;
+  --radius-button: 14px;
+  --radius-card: 20px;
+  --radius-input: 14px;
+  --radius-image: 20px;
+
+  /* Soft elevation — almost invisible */
+  --elevation-1: 0 1px 2px rgb(0 0 0 / 0.24);
+  --elevation-2: 0 4px 16px -4px rgb(0 0 0 / 0.4);
+  --elevation-3: 0 12px 32px -12px rgb(0 0 0 / 0.5);
+
+  /* 8pt spacing system */
+  --space-8: 0.5rem;
+  --space-16: 1rem;
+  --space-24: 1.5rem;
+  --space-32: 2rem;
+  --space-48: 3rem;
+  --space-64: 4rem;
+  --space-96: 6rem;
+  --space-128: 8rem;
+
+  /* Grid / grain */
+  --grid-opacity: 0.0035;
+  --grain-opacity: 0.015;
+
+  /* Motion tokens (CSS) */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-hover: 180ms;
+  --duration-card: 250ms;
+  --duration-section: 550ms;
+  --duration-hero: 800ms;
+  --reveal-y: 14px;
+  --arrow-travel: 3px;
+
+  /* Single typeface */
   --font-sans: 'Satoshi', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Switzer', var(--font-sans);
-  --font-syne: 'Syne', var(--font-sans);
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-display: var(--font-sans);
+  --font-syne: var(--font-sans);
+  --font-mono: var(--font-sans);
+
+  /* Legacy aliases — keep existing var() references from breaking */
+  --void: var(--background);
+  --ghost-white: var(--foreground);
+  --fog: var(--text-secondary);
+  --mist: var(--text-muted);
+  --gold: var(--foreground);
+  --amber: var(--text-secondary);
+  --indigo-deep: #1a1a1a;
 }
 
 @layer base {
@@ -74,12 +195,50 @@
     @apply antialiased;
     color-scheme: dark;
     scroll-behavior: smooth;
-    /* Sticky nav (h-16) clearance for hash / scrollIntoView targets */
     scroll-padding-top: 5rem;
   }
 
   section[id] {
     scroll-margin-top: 5rem;
+  }
+
+  /* Quiet handoff between chapters of the publication */
+  .og-section-rule {
+    border-color: rgb(255 255 255 / 0.06);
+  }
+
+  /**
+   * Selected Work rail — horizontal on md+, vertical stack below.
+   * Parent is max-w-[1200px] centered; padding matches section header.
+   */
+  .og-selected-work {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-padding-left: 1.5rem; /* px-6 */
+    scroll-padding-right: 1.5rem;
+  }
+
+  @media (min-width: 1024px) {
+    .og-selected-work {
+      scroll-padding-left: 2.5rem; /* lg:px-10 */
+      scroll-padding-right: 2.5rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .og-selected-work {
+      overscroll-behavior-x: contain;
+    }
+  }
+
+  .og-selected-work::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .og-selected-work {
+      scroll-behavior: auto;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -92,52 +251,92 @@
     @apply bg-background font-sans text-foreground;
     margin: 0;
     min-height: 100dvh;
+    font-size: 1.125rem; /* body 18px */
+    line-height: 1.6;
+    letter-spacing: -0.011em;
   }
 
   #root {
     min-height: 100dvh;
+    background-color: var(--background);
   }
 
   h1,
   h2,
-  h3 {
-    font-family: var(--font-display);
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    line-height: 1.1;
+  h3,
+  h4 {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    color: var(--foreground);
   }
 
   h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem); /* → hero 72 */
     line-height: 1.05;
+    font-weight: 500;
   }
 
-  /* Hero brand mark — fit glyphs; avoid bg-clip edge clipping */
+  h2 {
+    font-size: clamp(2rem, 4.5vw, 3.25rem); /* → section 52 */
+    line-height: 1.1;
+  }
+
+  h3 {
+    font-size: 2rem; /* project 32 */
+    line-height: 1.2;
+  }
+
+  h4 {
+    font-size: 1.5rem; /* heading 24 */
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+  }
+
   #hero-heading {
-    font-family: var(--font-syne), var(--font-display);
+    /* Fraunces comes from .og-hero-display — do not override family */
     overflow: visible;
     max-width: 100%;
   }
 
   #hero-heading span {
     overflow: visible;
-    /* Extra paint room so the last letter isn't clipped by bg-clip-text */
     padding-inline-end: 0.08em;
   }
 
-  h4 {
-    font-family: var(--font-display);
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    line-height: 1.15;
-  }
-
-  /* Primary actions use display face */
+  /* ── Button primitive ─────────────────────────────────────────── */
   .og-btn {
-    font-family: var(--font-display);
-    font-weight: 600;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 0.875rem; /* 14px */
+    letter-spacing: -0.01em;
+    height: 46px;
+    border-radius: var(--radius-button);
+    padding-inline: 24px;
+    border: 1px solid var(--border);
+    transition:
+      color var(--duration-hover) var(--ease-out),
+      background-color var(--duration-hover) var(--ease-out),
+      border-color var(--duration-hover) var(--ease-out),
+      transform var(--duration-hover) var(--ease-out),
+      opacity var(--duration-hover) var(--ease-out);
   }
 
-  /* Custom cursor — only while the gold follower is mounted */
+  .og-btn:active {
+    transform: scale(0.98);
+  }
+
+  /* Depth glyph (→) — 3px travel, matches design tokens */
+  .og-btn .og-btn-arrow,
+  .og-btn > span:last-child:not(:only-child) {
+    transition: transform var(--duration-hover) var(--ease-out);
+  }
+
+  .og-btn:hover .og-btn-arrow,
+  .og-btn:hover > span:last-child:not(:only-child) {
+    transform: translateX(3px);
+  }
+
   html.og-cursor-active,
   html.og-cursor-active * {
     cursor: none !important;
@@ -145,134 +344,233 @@
 }
 
 @layer utilities {
+  /* Type scale utilities */
+  .text-caption {
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+
+  .text-small {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .text-body {
+    font-size: 1.125rem;
+    line-height: 1.6;
+  }
+
+  .text-heading {
+    font-size: 1.5rem;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+  }
+
+  .text-project {
+    font-size: 2rem;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+  }
+
+  .text-section {
+    font-size: clamp(2rem, 4.5vw, 3.25rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+
+  .text-hero {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+  }
+
+  /* Interactive — hover only; no grow */
   .og-interactive {
     transition-property: color, background-color, border-color, opacity,
-      transform;
-    transition-duration: 220ms;
-    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+      transform, box-shadow;
+    transition-duration: var(--duration-hover);
+    transition-timing-function: var(--ease-out);
   }
 
-  .og-interactive:hover {
-    transform: scale(1.02);
+  .og-interactive:active {
+    transform: scale(0.98);
   }
 
-  /* Soft 3D depth accent — flagship / interactive editorial surfaces */
-  .og-depth-surface {
-    transform-style: preserve-3d;
+  /**
+   * Text link — identical hover language site-wide.
+   * Muted → foreground, 180ms ease-out.
+   */
+  .og-text-link {
+    color: var(--text-secondary);
     transition:
-      transform 320ms cubic-bezier(0.16, 1, 0.3, 1),
-      border-color 250ms cubic-bezier(0.16, 1, 0.3, 1),
-      box-shadow 320ms cubic-bezier(0.16, 1, 0.3, 1);
+      color var(--duration-hover) var(--ease-out),
+      opacity var(--duration-hover) var(--ease-out);
+  }
+
+  .og-text-link:hover,
+  .og-text-link:focus-visible {
+    color: var(--foreground);
+  }
+
+  .og-text-link:focus-visible {
+    outline: none;
+  }
+
+  /**
+   * Arrow / editorial link — colour + 3px arrow travel, same clock.
+   */
+  .og-arrow-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.875rem;
+    letter-spacing: -0.01em;
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .og-arrow-link:hover,
+  .og-arrow-link:focus-visible {
+    color: var(--foreground);
+  }
+
+  .og-arrow-link:focus-visible {
+    outline: none;
+  }
+
+  .og-arrow-link [data-arrow] {
+    display: inline-block;
+    transition: transform var(--duration-hover) var(--ease-out);
+  }
+
+  .og-arrow-link:hover [data-arrow],
+  .og-arrow-link:focus-visible [data-arrow] {
+    transform: translateX(var(--arrow-travel));
+  }
+
+  .og-arrow-link[data-dir='back']:hover [data-arrow],
+  .og-arrow-link[data-dir='back']:focus-visible [data-arrow] {
+    transform: translateX(calc(var(--arrow-travel) * -1));
+  }
+
+  /* Card / depth surface — quiet elevation */
+  .og-depth-surface {
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    box-shadow: var(--elevation-1);
+    transition:
+      transform var(--duration-card) var(--ease-out),
+      border-color var(--duration-card) var(--ease-out),
+      background-color var(--duration-card) var(--ease-out),
+      box-shadow var(--duration-card) var(--ease-out);
   }
 
   .og-depth-surface:hover {
-    transform: translateY(-6px) scale(1.005);
-    box-shadow:
-      0 28px 60px -28px rgb(0 0 0 / 0.9),
-      0 0 0 1px rgb(198 161 91 / 0.12),
-      inset 0 1px 0 rgb(245 244 240 / 0.07);
+    border-color: var(--border-hover);
+    background: var(--surface-hover);
+    box-shadow: var(--elevation-2);
+    transform: translateY(-2px);
   }
 
-  /*
-   * High-end glass — translucent so the WebGL MeshPhysicalMaterial plane
-   * + orb read through; typography stays crisp above.
-   */
+  /* Glass panels — restrained, monochrome */
   .og-glass {
-    background: rgb(11 11 10 / 0.28);
-    backdrop-filter: blur(2px) saturate(1.15);
-    -webkit-backdrop-filter: blur(2px) saturate(1.15);
-    box-shadow:
-      0 24px 80px -40px rgb(0 0 0 / 0.9),
-      inset 0 1px 0 rgb(245 244 240 / 0.12),
-      inset 0 0 0 1px rgb(198 161 91 / 0.08);
+    background: rgb(17 17 17 / 0.72);
+    backdrop-filter: blur(12px) saturate(1.05);
+    -webkit-backdrop-filter: blur(12px) saturate(1.05);
+    border: 1px solid var(--border);
+    box-shadow: var(--elevation-2);
   }
 
-  /* Low-power GPU fallback — stronger CSS frost, no WebGL glass meshes */
   .og-glass-fallback {
-    background: rgb(11 11 10 / 0.78);
-    backdrop-filter: blur(18px) saturate(1.05);
-    -webkit-backdrop-filter: blur(18px) saturate(1.05);
+    background: rgb(17 17 17 / 0.92);
+    backdrop-filter: blur(16px) saturate(1.02);
+    -webkit-backdrop-filter: blur(16px) saturate(1.02);
+    border: 1px solid var(--border);
   }
 
-  /* Subtle RGB fringe along edges (CSS stand-in for dispersion) */
   .og-glass-chroma {
     box-shadow:
-      inset 1px 0 0 rgb(198 161 91 / 0.18),
-      inset -1px 0 0 rgb(120 160 200 / 0.12),
-      inset 0 1px 0 rgb(245 244 240 / 0.1);
+      inset 0 1px 0 rgb(255 255 255 / 0.04),
+      var(--elevation-1);
   }
 
-  /*
-   * Liquid glass — CTAs / interactive chips.
-   * Gradient rim via border-box trick; soft depth shadow.
-   */
+  /* Chip / pill surface — no gradient rim */
   .og-liquid-glass {
-    background:
-      linear-gradient(rgb(9 9 11 / 0.42), rgb(9 9 11 / 0.42)) padding-box,
-      linear-gradient(
-          135deg,
-          rgb(212 175 55 / 0.25) 0%,
-          rgb(212 175 55 / 0.06) 42%,
-          transparent 72%
-        )
-        border-box;
-    border: 1px solid transparent;
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    box-shadow:
-      0 18px 48px -24px rgb(0 0 0 / 0.75),
-      inset 0 1px 0 rgb(245 244 240 / 0.1);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: none;
   }
 
-  /* Primary CTA — gold-tinted liquid glass */
-  .og-glass-cta {
-    background:
-      linear-gradient(rgb(198 161 91 / 0.78), rgb(212 175 55 / 0.72)) padding-box,
-      linear-gradient(
-          135deg,
-          rgb(245 244 240 / 0.45) 0%,
-          rgb(212 175 55 / 0.2) 45%,
-          transparent 75%
-        )
-        border-box;
-    border: 1px solid transparent;
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    box-shadow:
-      inset 0 1px 0 rgb(245 244 240 / 0.28),
-      0 14px 36px -14px rgb(212 175 55 / 0.4);
-  }
-
-  .og-glass-cta-fallback {
-    background: var(--primary);
-    border: 1px solid rgb(212 175 55 / 0.35);
+  .og-liquid-glass:hover {
+    border-color: var(--border-hover);
+    background: var(--surface-hover);
   }
 
   /*
-   * Boot preloader HUD — glass plate + continuous rim-light sweep.
+   * Primary CTA — engineered solid.
+   * Height / radius live on .og-btn; this class owns fill + hover.
    */
+  .og-glass-cta,
+  .og-glass-cta-fallback {
+    background: var(--foreground);
+    color: var(--primary-foreground);
+    border: 1px solid rgb(255 255 255 / 0.12);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+  }
+
+  .og-glass-cta:hover,
+  .og-glass-cta-fallback:hover {
+    background: #f0f0f0; /* ~2–3% shift from #FAFAFA */
+    border-color: rgb(255 255 255 / 0.2);
+  }
+
+  /* Secondary / ghost CTA */
+  .og-btn-secondary {
+    background: transparent;
+    color: var(--foreground);
+    border: 1px solid var(--border);
+  }
+
+  .og-btn-secondary:hover {
+    background: rgb(255 255 255 / 0.03);
+    border-color: var(--border-hover);
+  }
+
+  /* Card primitive */
+  .og-card {
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    box-shadow: var(--elevation-1);
+    transition:
+      border-color var(--duration-card) var(--ease-out),
+      background-color var(--duration-card) var(--ease-out),
+      box-shadow var(--duration-card) var(--ease-out);
+  }
+
+  .og-card:hover {
+    border-color: var(--border-hover);
+    background: var(--surface-hover);
+    box-shadow: var(--elevation-2);
+  }
+
+  /* Boot HUD — quiet glass, no gold sweep */
   .og-boot-hud {
     isolation: isolate;
-    border-radius: 1rem;
-    background:
-      linear-gradient(rgb(9 9 11 / 0.72), rgb(18 14 8 / 0.68)) padding-box,
-      linear-gradient(
-          160deg,
-          rgb(212 175 55 / 0.22) 0%,
-          rgb(212 175 55 / 0.05) 40%,
-          transparent 70%
-        )
-        border-box;
-    border: 1px solid transparent;
-    backdrop-filter: blur(24px) saturate(165%);
-    -webkit-backdrop-filter: blur(24px) saturate(165%);
-    box-shadow:
-      0 28px 80px -36px rgb(0 0 0 / 0.9),
-      inset 0 1px 0 rgb(245 244 240 / 0.08),
-      0 0 40px -12px rgb(245 158 11 / 0.18);
+    border-radius: var(--radius-card);
+    background: rgb(17 17 17 / 0.88);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(20px) saturate(1.05);
+    -webkit-backdrop-filter: blur(20px) saturate(1.05);
+    box-shadow: var(--elevation-3);
   }
 
-  /* Soft gold noise tint over the glass */
   .og-boot-hud::after {
     content: '';
     position: absolute;
@@ -280,67 +578,198 @@
     border-radius: inherit;
     pointer-events: none;
     z-index: 0;
-    opacity: 0.14;
+    opacity: 0.06;
     mix-blend-mode: soft-light;
-    background-image:
-      radial-gradient(circle at 18% 22%, rgb(245 158 11 / 0.35), transparent 42%),
-      radial-gradient(circle at 78% 68%, rgb(212 175 55 / 0.22), transparent 48%),
-      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
-    background-size: auto, auto, 140px 140px;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+    background-size: 140px 140px;
   }
 
   .og-boot-hud::before {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    border-radius: inherit;
-    padding: 1px;
-    pointer-events: none;
-    z-index: 2;
-    background: conic-gradient(
-      from var(--og-boot-rim-angle, 0deg),
-      transparent 0%,
-      rgb(212 175 55 / 0.08) 6%,
-      rgb(245 158 11 / 0.75) 12%,
-      rgb(253 230 138 / 0.95) 16%,
-      rgb(212 175 55 / 0.35) 22%,
-      transparent 34%,
-      transparent 68%,
-      rgb(180 140 60 / 0.2) 78%,
-      transparent 88%
-    );
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    animation: og-boot-rim-spin 2.8s linear infinite;
-  }
-
-  @keyframes og-boot-rim-spin {
-    to {
-      --og-boot-rim-angle: 360deg;
-    }
+    content: none;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .og-interactive:hover {
+    .og-interactive:active,
+    .og-btn:active {
       transform: none;
     }
 
     .og-depth-surface:hover {
       transform: none;
-      box-shadow: none;
     }
 
-    .og-boot-hud::before {
-      animation: none;
+    .og-btn:hover .og-btn-arrow,
+    .og-btn:hover > span:last-child:not(:only-child) {
+      transform: none;
     }
   }
 }
 
-@property --og-boot-rim-angle {
-  syntax: '<angle>';
-  inherits: false;
-  initial-value: 0deg;
+/* ── Hero editorial tokens (scoped — does not restyle other sections) ── */
+.og-hero {
+  --hero-bg: #0a0b0e;
+  --hero-text: #f2f1ee;
+  --hero-text-dim: #a1a1aa;
+  --hero-text-muted: #d4d4d8;
+  --hero-line: #1c1c1d;
+  --hero-moon-light: #d8d6d2;
+  --hero-moon-mid: #3f3f46;
+  --hero-moon-dark: #121214;
+  background-color: transparent;
+  color: var(--hero-text);
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+.og-hero-display {
+  font-family: 'Fraunces', 'Times New Roman', serif;
+  font-optical-sizing: auto;
+  font-weight: 360;
+  font-style: normal;
+  /* Loose enough that descenders never collide with the next line */
+  letter-spacing: -0.032em;
+  line-height: 1.14;
+}
+
+.og-hero-display-italic {
+  font-style: italic;
+  font-weight: 380;
+}
+
+.og-hero-mono {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.og-hero-cta-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 46px;
+  padding-inline: 24px;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in srgb, var(--hero-text) 88%, transparent);
+  background: color-mix(in srgb, var(--hero-text) 94%, transparent);
+  color: var(--hero-bg);
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  transition:
+    background-color 180ms var(--ease-out),
+    border-color 180ms var(--ease-out),
+    color 180ms var(--ease-out),
+    opacity 180ms var(--ease-out);
+}
+
+.og-hero-cta-primary:hover {
+  background: #f7f6f3;
+  border-color: #f7f6f3;
+  opacity: 0.92;
+}
+
+.og-hero-cta-primary:active {
+  transform: none;
+  opacity: 0.85;
+}
+
+.og-hero-cta-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 1px;
+  transition:
+    color 200ms ease,
+    border-color 200ms ease;
+}
+
+.og-hero-cta-arrow {
+  display: inline-block;
+  transition: transform 200ms ease;
+}
+
+.og-hero-cta-secondary:hover {
+  border-bottom-color: color-mix(in srgb, #ffffff 35%, transparent);
+}
+
+.og-hero-cta-secondary:hover .og-hero-cta-arrow {
+  transform: translateX(3px);
+}
+
+.og-hero-scroll-label {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--hero-text-dim);
+  opacity: 0.4;
+  transition: opacity 180ms var(--ease-out);
+}
+
+.og-hero-scroll-label:hover {
+  opacity: 0.7;
+}
+
+.og-hero-scroll-chevron {
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0;
+  animation: og-hero-scroll-nudge 2.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+/* Soft veil so the moon dissolves into the field — no hard wedge */
+.og-hero-moon-veil {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background:
+    radial-gradient(
+      ellipse 70% 85% at 78% 72%,
+      transparent 0%,
+      transparent 28%,
+      color-mix(in srgb, var(--hero-bg) 55%, transparent) 58%,
+      var(--hero-bg) 82%
+    ),
+    linear-gradient(
+      90deg,
+      var(--hero-bg) 0%,
+      color-mix(in srgb, var(--hero-bg) 70%, transparent) 28%,
+      transparent 52%
+    );
+}
+
+@keyframes og-hero-scroll-nudge {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.65;
+  }
+  50% {
+    transform: translateY(2px);
+    opacity: 0.95;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .og-hero-scroll-chevron {
+    animation: none;
+  }
+
+  .og-hero .og-hero-cta-primary {
+    transform: none !important;
+  }
+
+  .og-hero-cta-arrow {
+    transition: none;
+  }
 }

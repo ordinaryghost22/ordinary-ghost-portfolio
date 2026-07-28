@@ -43,18 +43,21 @@ export function SoundToggle({ className }: { className?: string }) {
       aria-pressed={enabled}
       aria-label={enabled ? 'Mute sound' : 'Enable sound'}
       className={cn(
-        'og-interactive inline-flex items-center gap-1.5 rounded-md border border-border/50',
-        'bg-foreground/[0.03] px-2 py-1.5 font-mono text-[10px] tracking-[0.14em] text-muted-foreground uppercase',
-        'transition-colors hover:border-amber-500/30 hover:text-amber-300',
+        'og-interactive inline-flex items-center gap-1.5 rounded-[14px] border border-[rgba(255,255,255,0.08)]',
+        'bg-[#111111] px-3 py-2 text-[12px] font-medium tracking-[-0.01em] text-[#A1A1AA] uppercase',
+        'transition-[border-color,color,background-color] duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)]',
+        'hover:border-[rgba(255,255,255,0.16)] hover:bg-[#171717] hover:text-[#FAFAFA]',
         'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
-        enabled && 'border-amber-500/25 text-amber-200/90',
+        enabled && 'border-[rgba(255,255,255,0.16)] text-[#FAFAFA]',
         className,
       )}
     >
-      <span aria-hidden>{enabled ? '🔊' : '🔇'}</span>
+      <span aria-hidden className="text-[10px] tracking-widest">
+        {enabled ? '●' : '○'}
+      </span>
       <span>
         SOUND:{' '}
-        <span className={enabled ? 'text-amber-300' : 'text-neutral-500'}>
+        <span className={enabled ? 'text-[#FAFAFA]' : 'text-[#6B7280]'}>
           {enabled ? 'ON' : 'OFF'}
         </span>
       </span>

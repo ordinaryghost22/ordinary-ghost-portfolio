@@ -1,365 +1,499 @@
-import { motion, useReducedMotion } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
+import {
+  motion,
+  useAnimationFrame,
+  useMotionValue,
+  useReducedMotion,
+} from 'framer-motion'
+import {
+  useEffect,
+  useRef,
+  useState,
+  type MouseEvent,
+  type ReactNode,
+} from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 
-import {
-  MagneticAnchor,
-  MagneticLink,
-  Typewriter,
-} from '@/components/common'
-import { HudStatusBar } from '@/components/common/HudStatusBar'
-import { useIntro } from '@/hooks/useIntro'
-import { useEffectiveLowPower } from '@/hooks/useEffectiveLowPower'
-import { socialBadgeClassName, socialLinks } from '@/data/contact'
+import { HeroStars } from '@/components/hero/HeroStars'
+import { MoonNight } from '@/components/hero/MoonNight'
 import { heroContent } from '@/data/hero'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
-import {
-  REVEAL_DURATION,
-  REVEAL_STAGGER,
-  fadeUp,
-  staggerContainer,
-} from '@/lib/motion'
+import { TEXT_LINK_CLASS, TEXT_LINK_UNDERLINE } from '@/lib/editorial'
+import { EASE_OUT } from '@/lib/motion'
 import {
   navigateWithCameraWarp,
+  scrollToSection,
   sectionIdFromHref,
 } from '@/lib/scroll'
-import { playUiSound } from '@/lib/uiSounds'
 import { cn } from '@/lib/utils'
 
-const ctaClass = {
-  primary: cn(
-    'og-btn og-interactive h-11 w-full justify-center gap-1.5 rounded-full px-2',
-    'font-mono text-[11px] font-medium tracking-wider text-primary-foreground uppercase',
-    'hover:brightness-110',
-    'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none',
-    'md:w-auto md:gap-2 md:px-5 md:text-xs',
-  ),
-  secondary: cn(
-    'og-btn og-interactive h-11 w-full justify-center gap-1.5 rounded-full px-2',
-    'font-mono text-[11px] font-medium tracking-wider text-foreground uppercase',
-    'border border-amber-500/20 bg-white/5 backdrop-blur-md',
-    'hover:border-amber-400/50 hover:bg-amber-400/10 transition-all',
-    'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none',
-    'md:w-auto md:gap-2 md:px-5 md:text-xs',
-  ),
+const SEQUENCE = {
+  moon: 80,
+  stars: 40,
+  eyebrow: 180,
+  line1: 280,
+  line2: 400,
+  line3: 520,
+  supporting: 680,
+  cta: 820,
+  scroll: 980,
+} as const
+
+const TYPE_PARALLAX_MAX = 2
+const TYPE_PARALLAX_LERP = 0.05
+
+const GRAIN_SVG = encodeURIComponent(
+  `<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'>
+    <filter id='n'>
+      <feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/>
+    </filter>
+    <rect width='100%' height='100%' filter='url(%23n)' opacity='0.55'/>
+  </svg>`,
+)
+
+function FadeUp({
+  delayMs,
+  active,
+  reduceMotion,
+  children,
+  className,
+  as = 'div',
+  y = 24,
+}: {
+  delayMs: number
+  active: boolean
+  reduceMotion: boolean
+  children: ReactNode
+  className?: string
+  as?: 'div' | 'span' | 'p'
+  y?: number
+}) {
+  const MotionTag =
+    as === 'span' ? motion.span : as === 'p' ? motion.p : motion.div
+
+  return (
+    <MotionTag
+      className={className}
+      initial={reduceMotion ? false : { opacity: 0, y }}
+      animate={
+        active
+          ? { opacity: 1, y: 0 }
+          : { opacity: 0, y: reduceMotion ? 0 : y }
+      }
+      transition={{
+        duration: reduceMotion ? 0 : 0.85,
+        ease: EASE_OUT,
+        delay: reduceMotion || !active ? 0 : delayMs / 1000,
+      }}
+    >
+      {children}
+    </MotionTag>
+  )
 }
 
-const TYPE_SPEED_MS = 18
+/** Soft magnetic follow — translate only, never scale */
+function SoftPrimaryLink({
+  href,
+  children,
+  reduceMotion,
+  onNavigate,
+}: {
+  href: string
+  children: ReactNode
+  reduceMotion: boolean
+  onNavigate: () => void
+}) {
+  const btnRef = useRef<HTMLAnchorElement>(null)
+  const target = useRef({ x: 0, y: 0 })
+  const current = useRef({ x: 0, y: 0 })
+  const active = useRef(false)
+  const rafRef = useRef<number>(0)
 
-function useHeroSequence(compact: boolean, useEntrance: boolean) {
-  const factor = compact ? 0.75 : 1
-  const parentStagger = REVEAL_STAGGER * factor
-  const rolesCompleteSec = parentStagger * 1 + REVEAL_DURATION
+  useEffect(() => {
+    if (reduceMotion) return
 
-  const typewriterStartMs = useEntrance
-    ? Math.round(rolesCompleteSec * 1000)
-    : 0
-  const typeDurationMs = heroContent.description.length * TYPE_SPEED_MS
-  const buttonsDelaySec = useEntrance
-    ? (typewriterStartMs + typeDurationMs + 120) / 1000
-    : 0
-  const socialDelaySec = useEntrance ? buttonsDelaySec + 0.18 : 0
+    const tick = () => {
+      const node = btnRef.current
+      if (!node) {
+        rafRef.current = requestAnimationFrame(tick)
+        return
+      }
 
-  return { typewriterStartMs, buttonsDelaySec, socialDelaySec }
+      const lerp = active.current ? 0.14 : 0.16
+      current.current.x += (target.current.x - current.current.x) * lerp
+      current.current.y += (target.current.y - current.current.y) * lerp
+
+      if (
+        !active.current &&
+        Math.abs(current.current.x) < 0.03 &&
+        Math.abs(current.current.y) < 0.03
+      ) {
+        current.current.x = 0
+        current.current.y = 0
+        target.current.x = 0
+        target.current.y = 0
+      }
+
+      node.style.transform = `translate3d(${current.current.x.toFixed(2)}px, ${current.current.y.toFixed(2)}px, 0)`
+      rafRef.current = requestAnimationFrame(tick)
+    }
+
+    rafRef.current = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [reduceMotion])
+
+  const onMove = (event: MouseEvent<HTMLDivElement>) => {
+    if (reduceMotion || !btnRef.current) return
+    const rect = btnRef.current.getBoundingClientRect()
+    const cx = rect.left + rect.width / 2
+    const cy = rect.top + rect.height / 2
+    const dx = event.clientX - cx
+    const dy = event.clientY - cy
+    const dist = Math.hypot(dx, dy)
+
+    if (dist > 56) {
+      active.current = false
+      target.current = { x: 0, y: 0 }
+      return
+    }
+
+    active.current = true
+    const strength = 1 - dist / 56
+    const max = 3.5
+    const inv = dist || 1
+    target.current = {
+      x: (dx / inv) * max * strength,
+      y: (dy / inv) * max * strength,
+    }
+  }
+
+  const onLeave = () => {
+    active.current = false
+    target.current = { x: 0, y: 0 }
+  }
+
+  return (
+    <div
+      className="relative inline-flex"
+      style={reduceMotion ? undefined : { padding: 56, margin: -56 }}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+    >
+      <Link
+        ref={btnRef}
+        to={href}
+        className={cn(
+          TEXT_LINK_CLASS,
+          TEXT_LINK_UNDERLINE,
+          'cursor-pointer text-[15px]',
+          'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--hero-text)]',
+        )}
+        style={
+          reduceMotion
+            ? undefined
+            : { willChange: 'transform', transition: 'none' }
+        }
+        onClick={(event) => {
+          event.preventDefault()
+          onNavigate()
+        }}
+      >
+        {children}
+        <span aria-hidden className="transition-transform duration-200 group-hover:translate-x-0.5">
+          →
+        </span>
+      </Link>
+    </div>
+  )
 }
 
 export function Hero() {
-  const reduceMotion = useReducedMotion()
-  const compact = useMediaQuery('(max-width: 640px)')
-  const lowPower = useEffectiveLowPower()
+  const reduceMotion = !!useReducedMotion()
   const navigate = useNavigate()
-  const { heroReady, playIntro, phase } = useIntro()
-  const useEntrance = playIntro
-  const preloaderActive = playIntro && phase === 'boot'
-  const heroLayerVisible = !preloaderActive
-  const { typewriterStartMs, buttonsDelaySec, socialDelaySec } = useHeroSequence(
-    compact,
-    useEntrance && !reduceMotion,
-  )
+  const [contentActive, setContentActive] = useState(reduceMotion)
+  const [moonReady, setMoonReady] = useState(reduceMotion)
+  const [starsReady, setStarsReady] = useState(reduceMotion)
+
+  const typeTargetX = useRef(0)
+  const typeTargetY = useRef(0)
+  const typeX = useMotionValue(0)
+  const typeY = useMotionValue(0)
+
+  useEffect(() => {
+    if (reduceMotion) {
+      setContentActive(true)
+      setMoonReady(true)
+      setStarsReady(true)
+      return
+    }
+
+    // Let the first paint settle on the hidden state, then play entrance
+    let moonTimer = 0
+    const start = window.requestAnimationFrame(() => {
+      setContentActive(true)
+      setStarsReady(true)
+      moonTimer = window.setTimeout(() => setMoonReady(true), SEQUENCE.moon)
+    })
+
+    return () => {
+      window.cancelAnimationFrame(start)
+      if (moonTimer) window.clearTimeout(moonTimer)
+    }
+  }, [reduceMotion])
+
+  useEffect(() => {
+    if (reduceMotion) {
+      typeTargetX.current = 0
+      typeTargetY.current = 0
+      typeX.set(0)
+      typeY.set(0)
+      return
+    }
+
+    const onMove = (event: PointerEvent) => {
+      const cx = window.innerWidth / 2
+      const cy = window.innerHeight / 2
+      if (cx <= 0 || cy <= 0) return
+      const nx = Math.max(-1, Math.min(1, (event.clientX - cx) / cx))
+      const ny = Math.max(-1, Math.min(1, (event.clientY - cy) / cy))
+      /* Opposite of moon — subtle counter-parallax for depth */
+      typeTargetX.current = -nx * TYPE_PARALLAX_MAX
+      typeTargetY.current = -ny * TYPE_PARALLAX_MAX
+    }
+
+    window.addEventListener('pointermove', onMove, { passive: true })
+    return () => window.removeEventListener('pointermove', onMove)
+  }, [reduceMotion, typeX, typeY])
+
+  useAnimationFrame(() => {
+    if (reduceMotion) {
+      typeX.set(0)
+      typeY.set(0)
+      return
+    }
+    typeX.set(typeX.get() + (typeTargetX.current - typeX.get()) * TYPE_PARALLAX_LERP)
+    typeY.set(typeY.get() + (typeTargetY.current - typeY.get()) * TYPE_PARALLAX_LERP)
+  })
 
   return (
     <section
       id="home"
       aria-labelledby="hero-heading"
       className={cn(
-        'relative flex items-stretch bg-transparent',
-        /* Mobile: height = content only (kills the black void) */
-        'min-h-0 max-md:overflow-x-clip',
-        /* Desktop: full viewport stage — allow title glyphs to paint fully */
-        'md:min-h-[calc(100dvh-4rem)] md:overflow-x-visible',
+        'og-hero relative overflow-hidden',
+        'min-h-0 md:min-h-[calc(100dvh-5rem)]',
       )}
     >
+      {/* Stars — behind moon */}
+      <motion.div
+        className="absolute inset-0 z-[1]"
+        initial={reduceMotion ? false : { opacity: 0 }}
+        animate={{ opacity: starsReady ? 1 : 0 }}
+        transition={{
+          duration: reduceMotion ? 0 : 1,
+          ease: EASE_OUT,
+          delay: reduceMotion ? 0 : SEQUENCE.stars / 1000,
+        }}
+        aria-hidden
+      >
+        <HeroStars ready={starsReady} />
+      </motion.div>
+
+      {/* Signature moon / globe — slide up + fade in */}
+      <motion.div
+        className="absolute inset-0 z-[2]"
+        initial={reduceMotion ? false : { opacity: 0, y: 48 }}
+        animate={
+          moonReady
+            ? { opacity: 1, y: 0 }
+            : { opacity: 0, y: reduceMotion ? 0 : 48 }
+        }
+        transition={{
+          duration: reduceMotion ? 0 : 1.15,
+          ease: EASE_OUT,
+          delay: reduceMotion ? 0 : 0.06,
+        }}
+        aria-hidden
+      >
+        <MoonNight ready={moonReady} />
+      </motion.div>
+
+      {/* Soft veil — dissolves moon into the field, kills hard wedges */}
+      <div className="og-hero-moon-veil" aria-hidden />
+
+      {/* Editorial copy — slide up + fade in, staggered */}
       <motion.div
         className={cn(
-          'z-20 flex w-full flex-col',
-          'relative',
-          'md:min-h-[calc(100dvh-4rem)]',
-          'lg:absolute lg:inset-0 lg:min-h-0',
+          'relative z-10 flex w-full flex-col',
+          'md:min-h-[calc(100dvh-5rem)]',
         )}
-        initial={false}
-        animate={{ opacity: heroLayerVisible ? 1 : 0 }}
-        transition={{
-          duration: heroLayerVisible ? 0.55 : 0,
-          ease: [0.16, 1, 0.3, 1],
-        }}
-        style={{ pointerEvents: heroLayerVisible ? 'auto' : 'none' }}
-        aria-hidden={preloaderActive}
+        style={reduceMotion ? undefined : { x: typeX, y: typeY }}
       >
         <div
           className={cn(
-            'mx-auto flex w-full max-w-7xl flex-col',
-            /* Dense packed stack — no flex-1 stretch on mobile */
-            'gap-0 px-4 pt-3 pb-4',
-            'md:flex-1 md:justify-center md:gap-8 md:px-6 md:py-10',
-            'lg:grid lg:grid-cols-12 lg:items-center lg:gap-10 lg:py-12',
+            'mx-auto flex w-full max-w-7xl flex-1 flex-col justify-start',
+            'px-6 pt-16 pb-32',
+            'md:pt-20',
+            'lg:pt-[min(12vh,6rem)] lg:pb-36',
           )}
         >
-          <div className="@container/hero relative z-10 flex w-full min-w-0 flex-col items-stretch text-left lg:col-span-5">
-            <motion.div
-              variants={staggerContainer({
-                reduceMotion: !useEntrance,
-                compact,
-              })}
-              initial={useEntrance ? 'hidden' : false}
-              animate={heroReady || !useEntrance ? 'visible' : 'hidden'}
-              className="flex w-full min-w-0 flex-col items-start"
+          <div className="w-full max-w-[36rem] lg:max-w-[42rem]">
+            <FadeUp
+              delayMs={SEQUENCE.eyebrow}
+              active={contentActive}
+              reduceMotion={reduceMotion}
+              y={18}
+              className="og-hero-mono text-[color:var(--hero-text-dim)]"
             >
-              <motion.div
-                variants={fadeUp({ reduceMotion: !useEntrance })}
-                className="flex w-full min-w-0 flex-col gap-2"
-              >
-                <span
-                  className={cn(
-                    'inline-flex max-w-full items-center gap-1.5',
-                    'font-mono text-[9px] tracking-[0.18em] text-amber-300/90 uppercase',
-                  )}
-                >
-                  <span
-                    className="size-1.5 shrink-0 animate-pulse rounded-full bg-emerald-400"
-                    aria-hidden
-                  />
-                  <span className="truncate">{heroContent.badge}</span>
-                </span>
+              {heroContent.eyebrow}
+            </FadeUp>
 
-                <ul
-                  className={cn(
-                    'flex w-full items-center gap-1.5 overflow-x-auto',
-                    '[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
-                    'md:hidden',
-                  )}
-                >
-                  {heroContent.roles.map((role, index) => (
-                    <li key={role} className="shrink-0">
-                      <span
-                        className={cn(
-                          'inline-flex items-center border px-2 py-0.5',
-                          'font-mono text-[8px] tracking-[0.14em] uppercase',
-                          index === 0
-                            ? 'border-amber-400/50 bg-amber-400/15 text-amber-300'
-                            : 'border-neutral-700/80 bg-black/40 text-neutral-400 backdrop-blur-sm',
-                        )}
-                      >
-                        {role}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-
-              <motion.h1
-                id="hero-heading"
-                className={cn(
-                  'mt-3 w-full min-w-0 overflow-visible font-[family-name:var(--font-syne)] text-left md:mt-5',
-                  'font-extrabold uppercase tracking-tight leading-[0.9]',
-                  /* Size to the column so "ORDINARY" never clips the Y */
-                  'text-[clamp(2rem,8.5vw,2.45rem)]',
-                  'md:text-[clamp(2.2rem,9.5cqi,2.65rem)]',
-                  'lg:text-[clamp(2.35rem,9cqi,2.75rem)]',
-                )}
-                initial={
-                  useEntrance && !reduceMotion
-                    ? { opacity: 0, y: 14 }
-                    : false
-                }
-                animate={
-                  !useEntrance || reduceMotion || heroReady
-                    ? { opacity: 1, y: 0 }
-                    : { opacity: 0, y: 14 }
-                }
-                transition={{
-                  duration: reduceMotion ? 0 : 1,
-                  ease: [0.16, 1, 0.3, 1],
-                  delay: reduceMotion || !useEntrance ? 0 : 0.12,
-                }}
-              >
-                <span className="block overflow-visible whitespace-nowrap bg-gradient-to-br from-white via-amber-50 to-amber-400 bg-clip-text pr-[0.06em] text-transparent">
-                  Ordinary
-                </span>
-                <span className="mt-0.5 block overflow-visible whitespace-nowrap pr-[0.06em] text-amber-200/95">
-                  Ghost
-                </span>
-              </motion.h1>
-
-              <motion.p
-                variants={fadeUp({ reduceMotion: !useEntrance })}
-                className="mt-2.5 max-w-md text-pretty font-mono text-[11px] leading-snug tracking-wide text-neutral-400 md:mt-4 md:text-[13px] md:leading-relaxed"
-              >
-                {heroContent.founderLine}
-              </motion.p>
-
-              <motion.p
-                variants={fadeUp({ reduceMotion: !useEntrance })}
-                className="mt-3 hidden max-w-full font-mono text-[10px] tracking-[0.22em] text-neutral-500 uppercase md:block"
-              >
-                {heroContent.roles.join(' · ')}
-              </motion.p>
-            </motion.div>
-
-            <div
+            <h1
+              id="hero-heading"
               className={cn(
-                'relative z-10 mt-4 w-full min-w-0 md:mt-7',
-                'rounded-2xl border border-white/10 bg-black/55 px-4 py-4 shadow-2xl backdrop-blur-sm',
-                'md:border-neutral-800/70 md:bg-neutral-950/70 md:p-6 md:backdrop-blur-xl',
+                'og-hero-display mt-10 text-[color:var(--hero-text)]',
+                'text-[clamp(3.25rem,8.6vw,6.5rem)]',
               )}
             >
-              <p className="max-w-prose text-left text-pretty text-[12.5px] leading-relaxed text-neutral-300 md:text-[15px] md:leading-relaxed">
-                <Typewriter
-                  text={heroContent.description}
-                  speed={TYPE_SPEED_MS}
-                  startDelay={typewriterStartMs}
-                  enabled={useEntrance}
-                  active={heroReady}
-                  className="text-left"
-                />
-              </p>
-
-              <motion.div
-                variants={fadeUp({
-                  reduceMotion: !useEntrance,
-                  delay: buttonsDelaySec,
-                })}
-                initial={useEntrance ? 'hidden' : false}
-                animate={heroReady || !useEntrance ? 'visible' : 'hidden'}
-                className="mt-4 grid w-full grid-cols-2 gap-2.5 md:mt-6 md:flex md:flex-row md:items-center md:justify-start md:gap-3"
+              <FadeUp
+                as="span"
+                className="block"
+                delayMs={SEQUENCE.line1}
+                active={contentActive}
+                reduceMotion={reduceMotion}
+                y={28}
               >
-                <MagneticLink
-                  to={heroContent.primaryCta.href}
-                  data-cursor="view"
-                  data-magnetic
-                  depthGlyph={<span className="text-[0.95em]">→</span>}
-                  containerClassName="min-w-0 w-full md:w-auto md:flex-none"
-                  className={cn(
-                    ctaClass.primary,
-                    lowPower ? 'og-glass-cta-fallback' : 'og-glass-cta',
-                  )}
-                  onClick={(event) => {
-                    event.preventDefault()
-                    navigate(heroContent.primaryCta.href)
-                    requestAnimationFrame(() => {
-                      navigateWithCameraWarp(
-                        sectionIdFromHref(heroContent.primaryCta.href),
-                      )
-                    })
-                  }}
-                >
-                  {heroContent.primaryCta.label}
-                </MagneticLink>
+                {heroContent.headline.line1}
+              </FadeUp>
+              <FadeUp
+                as="span"
+                className="mt-[0.18em] block"
+                delayMs={SEQUENCE.line2}
+                active={contentActive}
+                reduceMotion={reduceMotion}
+                y={28}
+              >
+                {heroContent.headline.line2}
+              </FadeUp>
+              <FadeUp
+                as="span"
+                className="mt-[0.18em] block"
+                delayMs={SEQUENCE.line3}
+                active={contentActive}
+                reduceMotion={reduceMotion}
+                y={28}
+              >
+                {heroContent.headline.line3Before}
+                <em className="og-hero-display-italic">
+                  {heroContent.headline.line3Italic}
+                </em>
+                {heroContent.headline.line3After}
+              </FadeUp>
+            </h1>
 
-                <MagneticAnchor
-                  href={heroContent.secondaryCta.href}
-                  download={heroContent.secondaryCta.download}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  data-magnetic
-                  depthGlyph={<span className="text-[0.85em]">↓</span>}
-                  containerClassName="min-w-0 w-full md:w-auto md:flex-none"
-                  className={ctaClass.secondary}
-                >
-                  {heroContent.secondaryCta.label}
-                </MagneticAnchor>
-              </motion.div>
+            <FadeUp
+              as="p"
+              delayMs={SEQUENCE.supporting}
+              active={contentActive}
+              reduceMotion={reduceMotion}
+              y={20}
+              className={cn(
+                'mt-12 max-w-[40ch]',
+                'text-[16px] leading-[1.7] tracking-[-0.011em] sm:text-[17px]',
+                'text-zinc-400',
+              )}
+            >
+              <span className="block">{heroContent.supporting[0]}</span>
+              <span className="mt-2 block text-zinc-400">
+                {heroContent.supporting[1]}
+              </span>
+            </FadeUp>
 
-              <motion.ul
-                variants={fadeUp({
-                  reduceMotion: !useEntrance,
-                  delay: socialDelaySec,
-                })}
-                initial={useEntrance ? 'hidden' : false}
-                animate={heroReady || !useEntrance ? 'visible' : 'hidden'}
+            <FadeUp
+              delayMs={SEQUENCE.cta}
+              active={contentActive}
+              reduceMotion={reduceMotion}
+              y={18}
+              className={cn(
+                'mt-12 flex flex-col items-start gap-5',
+                'sm:flex-row sm:items-center sm:gap-8',
+              )}
+            >
+              <SoftPrimaryLink
+                href={heroContent.primaryCta.href}
+                reduceMotion={reduceMotion}
+                onNavigate={() => {
+                  navigate(heroContent.primaryCta.href)
+                  requestAnimationFrame(() => {
+                    navigateWithCameraWarp(
+                      sectionIdFromHref(heroContent.primaryCta.href),
+                    )
+                  })
+                }}
+              >
+                {heroContent.primaryCta.label}
+              </SoftPrimaryLink>
+
+              <a
+                href={heroContent.secondaryCta.href}
+                download={heroContent.secondaryCta.download}
+                target="_blank"
+                rel="noopener noreferrer"
                 className={cn(
-                  'mt-3.5 flex w-full flex-nowrap items-center justify-start gap-1.5 overflow-x-auto',
-                  'font-mono text-xs',
-                  '[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
-                  'md:mt-5 md:gap-2 md:overflow-visible',
+                  TEXT_LINK_CLASS,
+                  TEXT_LINK_UNDERLINE,
+                  'cursor-pointer text-[15px]',
+                  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--hero-text)]',
                 )}
               >
-                {socialLinks.map((link) => {
-                  const Icon = link.icon
-                  return (
-                    <li key={link.label} className="shrink-0">
-                      <a
-                        href={link.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        data-magnetic
-                        onPointerEnter={() => {
-                          void playUiSound('hover')
-                        }}
-                        onClick={() => {
-                          void playUiSound('click')
-                        }}
-                        className={cn(
-                          socialBadgeClassName,
-                          'border-neutral-800/80 bg-black/30 px-2.5 py-1 text-[10px] font-mono whitespace-nowrap text-neutral-400 backdrop-blur-sm',
-                          'hover:border-amber-400/50 hover:text-amber-300',
-                          'md:bg-transparent md:px-3 md:py-1.5 md:text-xs md:backdrop-blur-none',
-                        )}
-                      >
-                        <Icon className="size-3 shrink-0 md:size-3.5" />
-                        <span>{link.label}</span>
-                      </a>
-                    </li>
-                  )
-                })}
-              </motion.ul>
-            </div>
-
-            {/* Telemetry in-flow on mobile — no absolute void */}
-            <motion.div
-              className="mt-4 md:hidden"
-              variants={fadeUp({
-                reduceMotion: !useEntrance,
-                delay: socialDelaySec + 0.08,
-                y: 6,
-              })}
-              initial={useEntrance ? 'hidden' : false}
-              animate={heroReady || !useEntrance ? 'visible' : 'hidden'}
-            >
-              <HudStatusBar variant="hero" />
-            </motion.div>
+                <span>{heroContent.secondaryCta.label}</span>
+                <span
+                  aria-hidden
+                  className="transition-transform duration-200 group-hover:translate-x-0.5"
+                >
+                  ↓
+                </span>
+              </a>
+            </FadeUp>
           </div>
-
-          <div
-            className="pointer-events-none relative hidden h-full min-h-[520px] items-center justify-center lg:col-span-7 lg:flex"
-            aria-hidden
-          />
         </div>
 
-        {/* Desktop telemetry only */}
-        <motion.div
-          className="pointer-events-none absolute inset-x-0 bottom-4 z-20 hidden px-6 md:block"
-          variants={fadeUp({
-            reduceMotion: !useEntrance,
-            delay: socialDelaySec + 0.08,
-            y: 8,
-          })}
-          initial={useEntrance ? 'hidden' : false}
-          animate={heroReady || !useEntrance ? 'visible' : 'hidden'}
+        <FadeUp
+          delayMs={SEQUENCE.scroll}
+          active={contentActive}
+          reduceMotion={reduceMotion}
+          y={12}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 pb-6 sm:bottom-10"
         >
-          <div className="mx-auto max-w-7xl overflow-hidden">
-            <HudStatusBar variant="hero" />
-          </div>
-        </motion.div>
+          <button
+            type="button"
+            aria-label="Scroll to work"
+            onClick={() => {
+              navigate('/#work')
+              requestAnimationFrame(() => {
+                scrollToSection('work')
+              })
+            }}
+            className={cn(
+              'og-hero-scroll-label flex cursor-pointer flex-col items-center gap-1.5',
+              'focus-visible:outline-none focus-visible:opacity-70',
+            )}
+          >
+            <span aria-hidden className="og-hero-scroll-chevron">
+              ↓
+            </span>
+            <span>Scroll</span>
+          </button>
+        </FadeUp>
       </motion.div>
+
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-[20] opacity-[0.015] mix-blend-overlay"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,${GRAIN_SVG}")`,
+          backgroundRepeat: 'repeat',
+          backgroundSize: '200px 200px',
+        }}
+      />
     </section>
   )
 }

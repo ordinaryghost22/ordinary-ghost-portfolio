@@ -8,9 +8,17 @@ type ProjectHoverPreviewProps = {
   className?: string
 }
 
+function monogram(title: string) {
+  const parts = title.split(/\s+/).filter(Boolean)
+  if (parts.length >= 2) {
+    return `${parts[0]![0] ?? ''}${parts[1]![0] ?? ''}`.toUpperCase()
+  }
+  return title.slice(0, 2).toUpperCase()
+}
+
 /**
- * Thumbnail anchored to the parent card’s top-right.
- * pointer-events-none so it never steals hover / flickers.
+ * Optional floating preview — kept for command / future surfaces.
+ * Projects section no longer uses card hover thumbnails.
  */
 export function ProjectHoverPreview({
   project,
@@ -22,41 +30,34 @@ export function ProjectHoverPreview({
     <AnimatePresence>
       {project ? (
         <motion.div
-          key={project.title}
+          key={project.id}
           aria-hidden
           className={cn(
-            'pointer-events-none absolute top-8 right-8 z-20 hidden w-[200px] overflow-hidden rounded-xl md:block',
-            'border border-primary/25 bg-[#0c0c0b]/90 shadow-[0_24px_60px_-28px_rgb(0_0_0/0.85)]',
-            'backdrop-blur-xl',
+            'pointer-events-none absolute top-8 right-8 z-20 hidden w-[200px] overflow-hidden rounded-[20px] md:block',
+            'border border-[rgba(255,255,255,0.08)] bg-[#111111]/95',
+            'shadow-[0_12px_32px_-12px_rgb(0_0_0/0.5)] backdrop-blur-xl',
             className,
           )}
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
+          exit={{ opacity: 0, scale: 0.96 }}
           transition={
             reduceMotion
               ? { duration: 0.12 }
               : { duration: 0.2, ease: [0.16, 1, 0.3, 1] }
           }
         >
-          <div
-            className="relative flex h-[120px] items-center justify-center"
-            style={{
-              background: `linear-gradient(145deg, ${project.preview.from} 0%, ${project.preview.to} 100%)`,
-            }}
-          >
-            <span className="font-display text-3xl font-semibold tracking-[-0.04em] text-white/90">
-              {project.preview.monogram}
+          <div className="relative flex h-[120px] items-center justify-center bg-[#090909]">
+            <span className="text-3xl font-medium tracking-[-0.04em] text-[#FAFAFA]/90">
+              {monogram(project.title)}
             </span>
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgb(255_255_255/0.18),transparent_55%)]" />
-            <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/50 to-transparent" />
           </div>
-          <div className="border-t border-white/10 px-3.5 py-2.5">
-            <p className="font-display text-sm font-semibold tracking-[-0.02em] text-foreground">
+          <div className="border-t border-[rgba(255,255,255,0.08)] px-3.5 py-2.5">
+            <p className="text-sm font-medium tracking-[-0.02em] text-[#FAFAFA]">
               {project.title}
             </p>
-            <p className="mt-0.5 font-mono text-[9px] tracking-[0.14em] text-muted-foreground uppercase">
-              {project.subtitle}
+            <p className="mt-0.5 line-clamp-2 text-[12px] text-[#6B7280]">
+              {project.summary}
             </p>
           </div>
         </motion.div>

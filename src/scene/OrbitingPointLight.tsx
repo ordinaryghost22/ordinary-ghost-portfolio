@@ -9,7 +9,7 @@ export function OrbitingPointLight({
   radius = 3.4,
   speed = 0.35,
   intensity = 0.65,
-  color = '#c6a15b',
+  color = '#E4E4E7',
   enabled = true,
 }: {
   radius?: number
